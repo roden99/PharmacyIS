@@ -4,6 +4,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SupplierController;
 
+Route::get('/login', function () {
+    return Inertia::render('Login/Index');
+})->name('login');
+
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
