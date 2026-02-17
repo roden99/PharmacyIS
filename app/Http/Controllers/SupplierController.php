@@ -10,11 +10,22 @@ class SupplierController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
 
 
-        $suppliers = supplier::orderBy('created_at', 'desc')->paginate(15)->through(function ($supplier) {
+
+        $search = $request->input('search');
+        $column = $request->input('column');
+
+        $query = supplier::query();
+
+
+        if (!empty($search) && strlen($search) >= 3 && !empty($column)) {
+            $query->where($column, 'like', "{$search}%");
+        }
+
+        $suppliers = $query->orderBy('created_at', 'desc')->paginate(15)->through(function ($supplier) {
             $supplier->full_name = trim(
                 strtoupper($supplier->lastname) . ', ' .
                     strtoupper($supplier->firstname) . ' ' .
@@ -27,10 +38,9 @@ class SupplierController extends Controller
 
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'company', 'header' => 'COMPANY', 'isVisible' => true, 'isParameter' => true],
-            ['accessorKey' => 'full_name', 'header' => 'REPRESENTATIVE', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'full_name', 'header' => 'REPRESENTATIVE', 'isVisible' => true, 'isParameter' => false],
             ['accessorKey' => 'contact_email', 'header' => 'EMAIL', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'contact_phone', 'header' => 'CONTACT #', 'isVisible' => true, 'isParameter' => true],
-
 
 
             // ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
