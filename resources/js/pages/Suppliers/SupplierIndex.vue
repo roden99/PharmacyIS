@@ -7,7 +7,8 @@ import { onMounted, ref, computed, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { router, usePage, Head } from '@inertiajs/vue3';
 import { isNumberArray } from '@tanstack/vue-table';
-// import Create from '@/pages/Members/Create.vue';
+import CreateSupplier from '@/pages/Suppliers/CreateSupplier.vue';
+
 // import Update from '@/pages/Members/Update.vue';
 // import Delete from '@/pages/Members/Delete.vue';
 
@@ -92,6 +93,8 @@ const handleAction = ({ type, data }) => {
 
 };
 
+const showCreateSupplierModal = ref(false);
+
 
 
 
@@ -106,15 +109,19 @@ const handleAction = ({ type, data }) => {
                 :columnDefs="columns.filter(col => col.isVisible === true)" :selectOptions="selectOptions"
                 v-model:selectModelValue="selectModelValue" @action="handleAction">
 
-                <Button variant="default" class="mr-2" @click="showCreateMemberModal = true">
+                <Button variant="default" class="mr-2" @click="showCreateSupplierModal = true">
                     New Supplier
                 </Button>
 
             </BaseIndex>
 
-            <!-- <Create v-if="showCreateMemberModal" @member-form-closed="showCreateMemberModal = false" />
+            <CreateSupplier v-if="showCreateSupplierModal" />
 
-            <Update v-if="showUpdateMemberModal" :member="selectedMember"
+            <!-- <CreateSupplier v-if="showCreateSupplierModal" @member-form-closed="showCreateSupplierModal = false" /> -->
+
+            <!-- <Create v-if="showCreateMemberModal" @member-form-closed="showCreateMemberModal = false" /> -->
+
+            <!--<Update v-if="showUpdateMemberModal" :member="selectedMember"
                 @member-form-closed="showUpdateMemberModal = false" />
 
             <Delete v-if="showDeleteMemberModal" :member="selectedMember"
