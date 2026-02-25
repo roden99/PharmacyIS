@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SupplierController;
@@ -17,6 +18,9 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::resource('suppliers', SupplierController::class);
+
+Route::resource('customers', CustomerController::class);
+
 
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';
