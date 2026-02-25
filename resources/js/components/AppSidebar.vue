@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, LucideNotebookText, Package, UserCheck, UserRoundSearch, UsersRound } from 'lucide-vue-next';
+import { BookOpen,Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon,NotebookText, ShoppingCartIcon,BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -18,12 +18,12 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Point of Sale',
-    icon: BookOpen,
+    icon: ScanBarcode,
     children: [
       {
         title: 'Menu #1',
         href: '/verify-eligibility',
-        icon: UserCheck,
+        icon: ScanBarcode,
       },
       {
         title: 'Menu #2',
@@ -35,7 +35,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Inventory',
-    icon: BookOpen,
+    icon: Boxes,
     children: [
       {
         title: 'Menu #1',
@@ -52,7 +52,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Warehouse',
-    icon: BookOpen,
+    icon: Warehouse,
     children: [
       {
         title: 'Menu #1',
@@ -69,7 +69,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Purchasing',
-    icon: BookOpen,
+    icon: ShoppingCart,
     children: [
       {
         title: 'Menu #1',
@@ -86,7 +86,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Stock Movement',
-    icon: BookOpen,
+    icon: BaggageClaim,
     children: [
       {
         title: 'Menu #1',
@@ -103,7 +103,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Customers',
-    icon: BookOpen,
+    icon: UsersRoundIcon,
     children: [
       {
         title: 'Menu #1',
@@ -120,7 +120,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Suppliers',
-    icon: BookOpen,
+    icon: Store,
     children: [
       {
         title: 'Supplier Lists',
@@ -137,7 +137,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'Reports',
-    icon: BookOpen,
+    icon: NotebookText,
     children: [
       {
         title: 'Menu #1',
@@ -154,7 +154,7 @@ const mainNavItems: NavItem[] = [
 
   {
     title: 'User Management',
-    icon: BookOpen,
+    icon: UserRoundCog,
     children: [
       {
         title: 'Menu #1',
@@ -170,7 +170,7 @@ const mainNavItems: NavItem[] = [
   },
   {
     title: 'Settings',
-    icon: BookOpen,
+    icon: Settings2,
     children: [
       {
         title: 'Menu #1',
