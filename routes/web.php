@@ -17,6 +17,10 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('under-construction', function () {
+    return Inertia::render('UnderConstruction');
+})->middleware(['auth', 'verified'])->name('under-construction');
+
 Route::resource('suppliers', SupplierController::class);
 
 Route::resource('customers', CustomerController::class);
