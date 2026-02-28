@@ -34,21 +34,21 @@ const submit = () => {
     <div :class="cn('flex flex-col gap-6', props.class)">
         <Card class="overflow-hidden p-0">
             <CardContent class="grid p-0 md:grid-cols-2">
-                <form @submit.prevent="submit" class="p-6 md:p-8">
+                <form @submit.prevent="submit" class="p-6 md:p-14">
                     <FieldGroup>
                         <div class="flex flex-col items-center gap-2 text-center">
-                            <h1 class="text-2xl font-bold">
-                                Pharmahealth Management System
-                            </h1>
-                            <!-- <p class="text-muted-foreground text-balance">
-                                Login to your Acme Inc account
-                            </p> -->
+                            <!-- <h1 class="text-lg font-sans font-medium tracking-tight">
+                                PHARMAHEALTH MANAGEMENT SYSTEM
+                            </h1> -->
+                            <p class="text-sm text-muted-foreground text-balance">
+                                Login to your Account
+                            </p>
                         </div>
                         <Field>
                             <FieldLabel for="email">
                                 Email
                             </FieldLabel>
-                            <Input id="email" v-model="form.email" type="email" placeholder="m@example.com" required />
+                            <Input id="email" v-model="form.email" type="email" placeholder="Enter your email" required />
                         </Field>
                         <Field>
                             <div class="flex items-center">
@@ -104,7 +104,7 @@ const submit = () => {
                     </FieldGroup>
                 </form>
                 <div class="bg-muted relative hidden md:block">
-                    <img src="/favicon.svg" alt="Image"
+                    <img src="/nxtr.svg" alt="Image"
                         class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale">
                 </div>
             </CardContent>
