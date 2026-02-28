@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\supplier;
 use Illuminate\Http\Request;
 
+
 class SupplierController extends Controller
 {
     /**
@@ -74,7 +75,31 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            // Supplier information
+            'company' => 'required|string|max:255',
+
+            // Contact person information
+            'lastname' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'middlename' => 'nullable|string|max:255',
+
+            // Contact details
+            'contact_phone' => 'required|string|max:50',
+            'contact_email' => 'required|email|max:255',
+
+            // Address information
+            'address' => 'nullable|string|max:500',
+
+        ]);
+
+        // Add system-generated fields
+        $validated['created_by'] = $request->user()->id;
+        $validated['status'] = $validated['status'] ?? 'active';
+
+        supplier::create($validated);
+
+        return redirect()->route('suppliers.index')->with('success', 'Supplier created successfully!');
     }
 
     /**
@@ -98,14 +123,43 @@ class SupplierController extends Controller
      */
     public function update(Request $request, supplier $supplier)
     {
-        //
+        $validated = $request->validate([
+            // Supplier information
+            'company' => 'required|string|max:255',
+
+            // Contact person information
+            'lastname' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'middlename' => 'nullable|string|max:255',
+
+            // Contact details
+            'contact_phone' => 'required|string|max:50',
+            'contact_email' => 'required|email|max:255',
+
+            // Address information
+            'address' => 'nullable|string|max:500',
+
+
+        ]);
+
+        // Add updated_by field
+        $validated['updated_by'] = $request->user()->id;
+
+        $supplier->update($validated);
+
+        return redirect()->route('suppliers.index')->with('success', 'Supplier updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(supplier $supplier)
+    public function destroy($id)
+
+
     {
-        //
+        $supplier = Supplier::findOrFail($id); // find supplier by ID or fail
+        $supplier->delete(); // delete supplier
+
+        return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully!');
     }
 }

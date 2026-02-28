@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen,Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon,NotebookText, ShoppingCartIcon,BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2 } from 'lucide-vue-next';
+import { BookOpen, Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon, NotebookText, ShoppingCartIcon, BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -19,18 +19,19 @@ const mainNavItems: NavItem[] = [
   {
     title: 'Point of Sale',
     icon: ScanBarcode,
-    children: [
-      {
-        title: 'Menu #1',
-        href: '/verify-eligibility',
-        icon: ScanBarcode,
-      },
-      {
-        title: 'Menu #2',
-        href: '/claim-eligibility',
-        icon: LucideNotebookText,
-      },
-    ],
+    href: '/under-construction',
+    // children: [
+    //   {
+    //     title: 'Menu #1',
+    //     href: '/under-construction',
+    //     icon: ScanBarcode,
+    //   },
+    //   {
+    //     title: 'Menu #2',
+    //     href: '/under-construction',
+    //     icon: LucideNotebookText,
+    //   },
+    // ],
   },
 
   {
@@ -38,67 +39,30 @@ const mainNavItems: NavItem[] = [
     icon: Boxes,
     children: [
       {
-        title: 'Menu #1',
-        href: '/verify-member',
-        icon: UserRoundSearch,
+        title: 'Item Lists',
+        href: '/under-construction',
+        icon: ScanBarcode,
       },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
+
     ],
   },
 
   {
     title: 'Warehouse',
     icon: Warehouse,
-    children: [
-      {
-        title: 'Menu #1',
-        href: '/verify-member',
-        icon: UserRoundSearch,
-      },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
-    ],
+    href: '/under-construction',
   },
 
   {
     title: 'Purchasing',
     icon: ShoppingCart,
-    children: [
-      {
-        title: 'Menu #1',
-        href: '/verify-member',
-        icon: UserRoundSearch,
-      },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
-    ],
+    href: '/under-construction',
   },
 
   {
     title: 'Stock Movement',
     icon: BaggageClaim,
-    children: [
-      {
-        title: 'Menu #1',
-        href: '/verify-member',
-        icon: UserRoundSearch,
-      },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
-    ],
+    href: '/under-construction',
   },
 
   {
@@ -106,15 +70,15 @@ const mainNavItems: NavItem[] = [
     icon: UsersRoundIcon,
     children: [
       {
-        title: 'Menu #1',
-        href: '/verify-member',
+        title: 'List Customers',
+        href: '/customers',
         icon: UserRoundSearch,
       },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
+      // {
+      //   title: 'Menu #2',
+      //   href: '/under-construction',
+      //   icon: LucideNotebookText,
+      // },
     ],
   },
 
@@ -124,65 +88,32 @@ const mainNavItems: NavItem[] = [
     children: [
       {
         title: 'Supplier Lists',
-        href: '/verify-member',
+        href: '/suppliers',
         icon: UserRoundSearch,
       },
-      {
-        title: '########',
-        href: '#',
-        icon: LucideNotebookText,
-      },
+      // {
+      //   title: '########',
+      //   href: '/under-construction',
+      //   icon: LucideNotebookText,
+      // },
     ],
   },
 
   {
     title: 'Reports',
     icon: NotebookText,
-    children: [
-      {
-        title: 'Menu #1',
-        href: '/verify-member',
-        icon: UserRoundSearch,
-      },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
-    ],
+    href: '/under-construction',
   },
 
   {
     title: 'User Management',
     icon: UserRoundCog,
-    children: [
-      {
-        title: 'Menu #1',
-        href: '/verify-member',
-        icon: UserRoundSearch,
-      },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
-    ],
+    href: '/under-construction',
   },
   {
     title: 'Settings',
     icon: Settings2,
-    children: [
-      {
-        title: 'Menu #1',
-        href: '/verify-member',
-        icon: UserRoundSearch,
-      },
-      {
-        title: 'Menu #2',
-        href: '#',
-        icon: LucideNotebookText,
-      },
-    ],
+    href: '/under-construction',
   },
 
 

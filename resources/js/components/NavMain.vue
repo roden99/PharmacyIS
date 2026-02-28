@@ -35,7 +35,8 @@ onMounted(() => {
     <SidebarMenu>
       <template v-for="item in items" :key="item.title">
         <SidebarMenuItem v-if="!item.children">
-          <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
+          <SidebarMenuButton as-child :is-active="item.href === page.url && item.href !== '/under-construction'"
+            :tooltip="item.title">
             <Link :href="item.href || ''">
               <component :is="item.icon" class="w-4 h-4" />
               <span>{{ item.title }}</span>
@@ -56,7 +57,8 @@ onMounted(() => {
           </SidebarMenuButton>
           <SidebarMenu v-show="openMenus[item.title]" class="pl-6">
             <SidebarMenuItem v-for="child in item.children" :key="child.title">
-              <SidebarMenuButton as-child :is-active="child.href === page.url" :tooltip="child.title">
+              <SidebarMenuButton as-child :is-active="child.href === page.url && child.href !== '/under-construction'"
+                :tooltip="child.title">
                 <Link :href="child.href || ''">
                   <component :is="child.icon" class="w-4 h-4" />
                   <span>{{ child.title }}</span>

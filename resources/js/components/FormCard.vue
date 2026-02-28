@@ -38,12 +38,12 @@ const props = defineProps({
     <div class="fixed inset-0 z-50 flex items-center justify-center">
         <!-- Overlay to dim and "disable" the main form -->
         <div class="absolute inset-0 bg-gray-200 opacity-70 pointer-events-none"></div>
-        <Card class="relative w-full max-w-3xl pointer-events-auto z-10">
+        <Card class="relative w-full max-w-3xl pointer-events-auto z-10 pb-0">
             <CardHeader>
                 <CardTitle>{{ cardTitle }}</CardTitle>
             </CardHeader>
 
-            <CardContent class="space-y-3" :class="{ 'opacity-50 pointer-events-none': loading }">
+            <CardContent class="space-y-3 pb-0" :class="{ 'opacity-50 pointer-events-none': loading }">
 
                 <slot></slot>
 

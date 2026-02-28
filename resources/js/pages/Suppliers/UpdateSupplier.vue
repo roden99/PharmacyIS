@@ -4,6 +4,13 @@ import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 
+const props = defineProps({
+    supplier: {
+        type: Object,
+        required: true,
+    }
+});
+
 const emit = defineEmits(['member-form-closed']);
 
 const handleClose = () => {
@@ -11,22 +18,21 @@ const handleClose = () => {
 };
 
 
-
 const isProcessing = ref(false);
 const handleSubmit = (formData) => {
     isProcessing.value = true;
-    router.post('/suppliers', formData, {
+    router.put(`/suppliers/${props.supplier.id}`, formData, {
         preserveScroll: "errors",
         preserveState: "errors",
         onSuccess: () => {
-            toast.success('Success', { description: 'Supplier created successfully!' });
+            toast.success('Success', { description: 'Supplier updated successfully!' });
             isProcessing.value = false;
             emit('member-form-closed'); // Close modal on success
         },
         onError: (errors) => {
-            console.log('asdadasd')
+
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to create supplier.', { description: errors[firstErrorKey] });
+            toast.warning('Failed to update supplier.', { description: errors[firstErrorKey] });
             isProcessing.value = false;
         },
         onFinish: () => {
@@ -41,7 +47,7 @@ const handleSubmit = (formData) => {
 
     <div>
         <SupplierForm @saveSupplier="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
-            :card-title="'New Supplier'" :transaction-type="'create'" />
+            :card-title="'Update Supplier'" :transaction-type="'update'" :supplier="supplier" />
     </div>
 
 </template>

@@ -9,7 +9,8 @@ import { router, usePage, Head } from '@inertiajs/vue3';
 import { isNumberArray } from '@tanstack/vue-table';
 import CreateSupplier from '@/pages/Suppliers/CreateSupplier.vue';
 
-// import Update from '@/pages/Members/Update.vue';
+import UpdateSupplier from '@/pages/Suppliers/UpdateSupplier.vue';
+import DeleteSupplier from '@/pages/Suppliers/DeleteSupplier.vue';
 // import Delete from '@/pages/Members/Delete.vue';
 
 
@@ -27,7 +28,7 @@ const breadcrumbs = [
 
 const props = defineProps({
     suppliers: {
-        type: Array,
+        // type: Array,
         required: true,
     },
     columns: {
@@ -48,17 +49,17 @@ const selectModelValue = ref(
     selectOptions.length > 0 ? selectOptions[0].value : ''
 );
 
-const showCreateMemberModal = ref(false);
-const showUpdateMemberModal = ref(false);
-const showDeleteMemberModal = ref(false);
-const selectedMember = ref(null);
+// const showCreateSupplierModal = ref(false);
+const showUpdateSupplierModal = ref(false);
+const showDeleteSupplierModal = ref(false);
+const selectedSupplier = ref(null);
 
 
 const handleAction = ({ type, data }) => {
 
     console.log('🎯 Action Clicked:', {
         actionType: type,
-        memberData: data,
+        supplierData: data,
         timestamp: new Date().toISOString(),
 
 
@@ -67,8 +68,8 @@ const handleAction = ({ type, data }) => {
     switch (type) {
         case 'edit':
             console.log('📄 Edit action for:', data);
-            showUpdateMemberModal.value = true;
-            selectedMember.value = data;
+            showUpdateSupplierModal.value = true;
+            selectedSupplier.value = data;
 
             break;
 
@@ -78,9 +79,8 @@ const handleAction = ({ type, data }) => {
 
 
         case 'delete':
-            showDeleteMemberModal.value = true;
-            selectedMember.value = data;
-            console.log('🗑️ Delete action for:', data);
+            showDeleteSupplierModal.value = true;
+            selectedSupplier.value = data;
 
 
             // handleDelete(data.id);
@@ -115,17 +115,15 @@ const showCreateSupplierModal = ref(false);
 
             </BaseIndex>
 
-            <CreateSupplier v-if="showCreateSupplierModal" />
+            <CreateSupplier v-if="showCreateSupplierModal" @member-form-closed="showCreateSupplierModal = false" />
 
-            <!-- <CreateSupplier v-if="showCreateSupplierModal" @member-form-closed="showCreateSupplierModal = false" /> -->
 
-            <!-- <Create v-if="showCreateMemberModal" @member-form-closed="showCreateMemberModal = false" /> -->
 
-            <!--<Update v-if="showUpdateMemberModal" :member="selectedMember"
-                @member-form-closed="showUpdateMemberModal = false" />
+            <UpdateSupplier v-if="showUpdateSupplierModal" :supplier="selectedSupplier"
+                @member-form-closed="showUpdateSupplierModal = false" />
 
-            <Delete v-if="showDeleteMemberModal" :member="selectedMember"
-                @member-form-closed="showDeleteMemberModal = false" /> -->
+            <DeleteSupplier v-if="showDeleteSupplierModal" :supplier="selectedSupplier"
+                @member-form-closed="showDeleteSupplierModal = false" />
 
 
         </div>
