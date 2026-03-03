@@ -17,7 +17,10 @@ class BrandFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'brandname' => fake()->company() . ' ' . fake()->randomElement(['Brand', 'Co.', 'Inc.', 'Ltd.']),
+            'status' => fake()->boolean(90), // 90% chance of being active
+            'created_by' => null, // Will be set in seeder
+            'updated_by' => null, // Will be set in seeder
         ];
     }
 }

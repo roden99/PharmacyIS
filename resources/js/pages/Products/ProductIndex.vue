@@ -7,12 +7,11 @@ import { onMounted, ref, computed, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { router, usePage, Head } from '@inertiajs/vue3';
 import { isNumberArray } from '@tanstack/vue-table';
-import CreateSupplier from '@/pages/Suppliers/CreateSupplier.vue';
 
-import UpdateSupplier from '@/pages/Suppliers/UpdateSupplier.vue';
-import DeleteSupplier from '@/pages/Suppliers/DeleteSupplier.vue';
-// import Delete from '@/pages/Members/Delete.vue';
 
+import CreateProduct from '@/pages/Products/CreateProduct.vue';
+import UpdateProduct from '@/pages/Products/UpdateProduct.vue';
+import DeleteProduct from '@/pages/Products/DeleteProduct.vue';
 
 
 const breadcrumbs = [
@@ -21,24 +20,30 @@ const breadcrumbs = [
         href: '/dashboard',
     },
     {
-        title: 'Supplier List',
-        href: '/suppliers',
+        title: 'Product List',
+        href: '/products',
     },
 ];
 
+
+
 const props = defineProps({
-    suppliers: {
+    products: {
         // type: Array,
         required: true,
     },
+
     columns: {
         type: Array,
         required: true,
     },
 
+    brands: {
+        type: Array,
+        default: () => []
+    },
+
 });
-
-
 
 
 const selectOptions = props.columns.filter(col => col.isParameter === true).map((s) => ({
@@ -49,17 +54,18 @@ const selectModelValue = ref(
     selectOptions.length > 0 ? selectOptions[0].value : ''
 );
 
-// const showCreateSupplierModal = ref(false);
-const showUpdateSupplierModal = ref(false);
-const showDeleteSupplierModal = ref(false);
-const selectedSupplier = ref(null);
+const showCreateProductModal = ref(false);
+
+const showUpdateProductModal = ref(false);
+const showDeleteProductModal = ref(false);
+const selectedProduct = ref(null);
 
 
 const handleAction = ({ type, data }) => {
 
     console.log('🎯 Action Clicked:', {
         actionType: type,
-        supplierData: data,
+        productData: data,
         timestamp: new Date().toISOString(),
 
 
@@ -68,8 +74,8 @@ const handleAction = ({ type, data }) => {
     switch (type) {
         case 'edit':
             console.log('📄 Edit action for:', data);
-            showUpdateSupplierModal.value = true;
-            selectedSupplier.value = data;
+            showUpdateProductModal.value = true;
+            selectedProduct.value = data;
 
             break;
 
@@ -79,8 +85,8 @@ const handleAction = ({ type, data }) => {
 
 
         case 'delete':
-            showDeleteSupplierModal.value = true;
-            selectedSupplier.value = data;
+            showDeleteProductModal.value = true;
+            selectedProduct.value = data;
 
 
             // handleDelete(data.id);
@@ -93,40 +99,41 @@ const handleAction = ({ type, data }) => {
 
 };
 
-const showCreateSupplierModal = ref(false);
-
 
 
 
 </script>
+
+
 <template>
 
-    <Head title="Members" />
+    <Head title="Products" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <!-- Use the reactive suppliers data -->
-            <BaseIndex IndexType="Suppliers" :data="props.suppliers"
+            <!-- Use the reactive products data -->
+            <BaseIndex IndexType="Products" :data="props.products"
                 :columnDefs="columns.filter(col => col.isVisible === true)" :selectOptions="selectOptions"
                 v-model:selectModelValue="selectModelValue" @action="handleAction" :hover-fields="[
-                    { field: 'company', label: 'Company' },
-                    { field: 'firstname', label: 'Representative' }
+                    { field: 'productname', label: 'Product Name' },
+                    { field: 'brand_name', label: 'Brand' }
                 ]">
 
-                <Button variant="default" class="mr-2" @click="showCreateSupplierModal = true">
-                    New Supplier
+                <Button variant="default" class="mr-2" @click="showCreateProductModal = true">
+                    New Product
                 </Button>
 
             </BaseIndex>
 
-            <CreateSupplier v-if="showCreateSupplierModal" @member-form-closed="showCreateSupplierModal = false" />
+            <CreateProduct v-if="showCreateProductModal" @form-closed="showCreateProductModal = false"
+                :brands="brands" />
 
 
 
-            <UpdateSupplier v-if="showUpdateSupplierModal" :supplier="selectedSupplier"
-                @member-form-closed="showUpdateSupplierModal = false" />
+            <UpdateProduct v-if="showUpdateProductModal" :product="selectedProduct" :brands="brands"
+                @product-form-closed="showUpdateProductModal = false" />
 
-            <DeleteSupplier v-if="showDeleteSupplierModal" :supplier="selectedSupplier"
-                @member-form-closed="showDeleteSupplierModal = false" />
+            <DeleteProduct v-if="showDeleteProductModal" :product="selectedProduct"
+                @product-form-closed="showDeleteProductModal = false" />
 
 
         </div>

@@ -4,6 +4,8 @@ use App\Http\Controllers\CustomerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/login', function () {
     return Inertia::render('Login/Index');
@@ -24,6 +26,12 @@ Route::get('under-construction', function () {
 Route::resource('suppliers', SupplierController::class);
 
 Route::resource('customers', CustomerController::class);
+
+Route::resource('brands', BrandController::class);
+Route::resource('products', ProductController::class);
+
+
+
 
 
 require __DIR__ . '/settings.php';

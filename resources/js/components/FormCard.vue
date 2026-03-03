@@ -29,6 +29,11 @@ const props = defineProps({
     text: {
         type: String,
         default: 'Save',
+    },
+
+    maxWidth: {
+        type: String,
+        default: 'max-w-3xl'
     }
 
 });
@@ -38,7 +43,7 @@ const props = defineProps({
     <div class="fixed inset-0 z-50 flex items-center justify-center">
         <!-- Overlay to dim and "disable" the main form -->
         <div class="absolute inset-0 bg-gray-200 opacity-70 pointer-events-none"></div>
-        <Card class="relative w-full max-w-3xl pointer-events-auto z-10 pb-0">
+        <Card :class="['relative w-full pointer-events-auto z-10 pb-0', maxWidth]">
             <CardHeader>
                 <CardTitle>{{ cardTitle }}</CardTitle>
             </CardHeader>

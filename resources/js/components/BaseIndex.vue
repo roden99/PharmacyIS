@@ -1,5 +1,6 @@
 <script setup>
 import GenericTable from '@/components/GenericTable.vue';
+import BaseHover from '@/components/BaseHover.vue';
 import { Button } from '@/components/ui/button';
 import { FlexRender } from '@tanstack/vue-table';
 import { CircleDot, Circle, CircleAlert } from 'lucide-vue-next';
@@ -74,8 +75,46 @@ const props = defineProps({
     paginationData: {
         type: Object,
         default: null
+    },
+
+    // ✅ ADD: Hover configuration props
+    hoverFields: {
+        type: Array,
+        default: () => []
+    },
+    // Legacy single field support
+    hoverField: {
+        type: String,
+        default: null
+    },
+    hoverLabel: {
+        type: String,
+        default: null
     }
 });
+
+const computedHoverItems = (rowData) => {
+    // If hoverFields array is provided, use it
+    if (props.hoverFields && props.hoverFields.length > 0) {
+        return props.hoverFields.map(config => ({
+            label: config.label,
+            value: rowData[config.field]
+        }));
+    }
+    // Otherwise, use legacy single field
+    if (props.hoverField) {
+        const label = props.hoverLabel || `${props.IndexType} ${props.hoverField}`;
+        return [{
+            label: label,
+            value: rowData[props.hoverField]
+        }];
+    }
+    // Default to ID
+    return [{
+        label: `${props.IndexType} ID`,
+        value: rowData['id']
+    }];
+};
 
 // ✅ ADD: Define actions based on IndexType
 const getActionsForIndex = (indexType) => {
@@ -425,29 +464,27 @@ watch(selectValue, (val, oldVal) => {
                             <template v-if="table.getRowModel().rows?.length">
                                 <template v-for="row in table.getRowModel().rows" :key="row.id">
                                     <TableRow :data-state="row.getIsSelected() && 'selected'">
-                                        <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id"
+                                        <TableCell v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
                                             class="capitalize text-left">
 
-                                            <!-- 
-                                      {{ toupper(cell.getValue()) }} -->
+                                            <!-- Wrap all cells with BaseHover to show dynamic data -->
+                                            <BaseHover :items="computedHoverItems(row.original)">
+                                                <!-- Check if column is gender -->
+                                                <template v-if="cell.column.id === 'sex'">
+                                                    <div class="flex items-center gap-2">
+                                                        <Circle v-if="cell.getValue() === 'M'"
+                                                            class="h-4 w-4 text-blue-500" />
+                                                        <CircleDot v-else class="h-4 w-4 text-pink-500" />
 
-                                            <!-- <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" /> -->
+                                                    </div>
+                                                </template>
 
-                                            <!-- Check if column is gender -->
-                                            <template v-if="cell.column.id === 'sex'">
-                                                <div class="flex items-center gap-2">
-                                                    <Circle v-if="cell.getValue() === 'M'"
-                                                        class="h-4 w-4 text-blue-500" />
-                                                    <CircleDot v-else class="h-4 w-4 text-pink-500" />
-
-                                                </div>
-                                            </template>
-
-                                            <!-- For other columns, use FlexRender -->
-                                            <template v-else>
-                                                <FlexRender :render="cell.column.columnDef.cell"
-                                                    :props="cell.getContext()" />
-                                            </template>
+                                                <!-- For other columns, use FlexRender -->
+                                                <template v-else>
+                                                    <FlexRender :render="cell.column.columnDef.cell"
+                                                        :props="cell.getContext()" />
+                                                </template>
+                                            </BaseHover>
                                         </TableCell>
                                     </TableRow>
                                     <TableRow v-if="row.getIsExpanded()">
