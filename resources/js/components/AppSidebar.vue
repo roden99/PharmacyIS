@@ -40,8 +40,14 @@ const mainNavItems: NavItem[] = [
     children: [
       {
         title: 'Item Lists',
-        href: '/under-construction',
+        href: '/products',
         icon: ScanBarcode,
+      },
+
+      {
+        title: 'Brand Lists',
+        href: '/brands',
+        icon: NotebookText,
       },
 
     ],
