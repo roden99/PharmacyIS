@@ -82,14 +82,14 @@ const brandOptions = computed(() => {
 
 
 
-const emit = defineEmits(['save', 'form-closed']);
+const emit = defineEmits(['handleSubmit', 'form-closed']);
 
 
 
-const save = () => {
+const handleSubmit = () => {
     try {
 
-        emit('save', form.data());
+        emit('handleSubmit', form.data());
     } catch (error) {
         toast.error('ERROR', { description: error.message });
     }

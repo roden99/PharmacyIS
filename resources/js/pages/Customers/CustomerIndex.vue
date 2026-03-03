@@ -8,10 +8,8 @@ import { toast } from 'vue-sonner';
 import { router, usePage, Head } from '@inertiajs/vue3';
 import { isNumberArray } from '@tanstack/vue-table';
 import CreateCustomer from '@/pages/Customers/CreateCustomer.vue';
-
-
-// import Update from '@/pages/Members/Update.vue';
-// import Delete from '@/pages/Members/Delete.vue';
+import UpdateCustomer from '@/pages/Customers/UpdateCustomer.vue';
+import DeleteCustomer from '@/pages/Customers/DeleteCustomer.vue';
 
 
 
@@ -26,75 +24,82 @@ const breadcrumbs = [
     },
 ];
 
-// const props = defineProps({
-//     suppliers: {
-//         type: Array,
-//         required: true,
-//     },
-//     columns: {
-//         type: Array,
-//         required: true,
-//     },
+const props = defineProps({
+    customers: {
+        required: true,
+    },
+    columns: {
+        type: Array,
+        required: true,
+    },
 
-// });
-
+});
 
 
 
-// const selectOptions = props.columns.filter(col => col.isParameter === true).map((s) => ({
-//     value: s.accessorKey,
-//     label: s.header,
-// }))
-// const selectModelValue = ref(
-//     selectOptions.length > 0 ? selectOptions[0].value : ''
-// );
 
-// const showCreateMemberModal = ref(false);
-// const showUpdateMemberModal = ref(false);
-// const showDeleteMemberModal = ref(false);
-// const selectedMember = ref(null);
+const selectOptions = props.columns.filter(col => col.isParameter === true).map((s) => ({
+    value: s.accessorKey,
+    label: s.header,
+}))
+const selectModelValue = ref(
+    selectOptions.length > 0 ? selectOptions[0].value : ''
+);
 
-
-// const handleAction = ({ type, data }) => {
-
-//     console.log('🎯 Action Clicked:', {
-//         actionType: type,
-//         memberData: data,
-//         timestamp: new Date().toISOString(),
+const showCreateCustomerModal = ref(false);
+const showUpdateCustomerModal = ref(false);
+const showDeleteCustomerModal = ref(false);
+const selectedCustomer = ref(null);
 
 
-//     });
+const handleAction = ({ type, data }) => {
 
-//     switch (type) {
-//         case 'edit':
-//             console.log('📄 Edit action for:', data);
-//             showUpdateMemberModal.value = true;
-//             selectedMember.value = data;
-
-//             break;
-
-//         case 'download':
-//             console.log('📥 Download action for:', data);
-//             break;
+    console.log('🎯 Action Clicked:', {
+        actionType: type,
+        customerData: data,
+        timestamp: new Date().toISOString(),
 
 
-//         case 'delete':
-//             showDeleteMemberModal.value = true;
-//             selectedMember.value = data;
-//             console.log('🗑️ Delete action for:', data);
+    });
+
+    switch (type) {
+        case 'edit':
+            console.log('📄 Edit action for:', data);
+            showUpdateCustomerModal.value = true;
+            selectedCustomer.value = data;
+
+            break;
+
+        case 'download':
+            console.log('📥 Download action for:', data);
+            break;
 
 
-//             // handleDelete(data.id);
-//             break;
+        case 'delete':
+            showDeleteCustomerModal.value = true;
+            selectedCustomer.value = data;
 
 
-//         default:
-//             console.log(`❓ Unknown action "${type}" for:`, data);
-//     }
+            // handleDelete(data.id);
+            break;
 
-// };
 
-// const showCreateSupplierModal = ref(false);
+        default:
+            console.log(`❓ Unknown action "${type}" for:`, data);
+    }
+
+};
+
+// Format customers with concatenated full name
+const formattedCustomers = computed(() => {
+    // Handle both array and paginated object (with .data property)
+    const customersList = Array.isArray(props.customers) ? props.customers : props.customers?.data || [];
+
+    return customersList.map(customer => ({
+        ...customer,
+        fullname: `${customer.first_name || ''} ${customer.middle_name || ''} ${customer.last_name || ''}`.trim()
+    }));
+});
 
 
 
@@ -105,12 +110,28 @@ const breadcrumbs = [
     <Head title="Customers" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <!-- Use the reactive customers data -->
+            <BaseIndex IndexType="Customers" :data="formattedCustomers"
+                :columnDefs="columns.filter(col => col.isVisible === true)" :selectOptions="selectOptions"
+                v-model:selectModelValue="selectModelValue" @action="handleAction" :hover-fields="[
+                    { field: 'fullname', label: 'Customer Name' },
+                    { field: 'email', label: 'Email' },
+                    { field: 'phone', label: 'Phone' }
+                ]">
 
-         
-           
-           
+                <Button variant="default" class="mr-2" @click="showCreateCustomerModal = true">
+                    New Customer
+                </Button>
 
-            <CreateCustomer />
+            </BaseIndex>
+
+            <CreateCustomer v-if="showCreateCustomerModal" @member-form-closed="showCreateCustomerModal = false" />
+
+            <UpdateCustomer v-if="showUpdateCustomerModal" :customer="selectedCustomer"
+                @member-form-closed="showUpdateCustomerModal = false" />
+
+            <DeleteCustomer v-if="showDeleteCustomerModal" :customer="selectedCustomer"
+                @member-form-closed="showDeleteCustomerModal = false" />
 
 
         </div>

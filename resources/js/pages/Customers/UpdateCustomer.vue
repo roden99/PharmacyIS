@@ -1,40 +1,38 @@
 <script setup>
-import ProductForm from './ProductForm.vue'
+import CustomerForm from '@/pages/Customers/CustomerForm.vue'
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 
-
-
 const props = defineProps({
-    product: {
+    customer: {
         type: Object,
         required: true,
     }
 });
 
-const emit = defineEmits(['product-form-closed']);
+const emit = defineEmits(['member-form-closed']);
 
 const handleClose = () => {
-    emit('product-form-closed');
+    emit('member-form-closed');
 };
 
 
 const isProcessing = ref(false);
 const handleSubmit = (formData) => {
     isProcessing.value = true;
-    router.delete(`/products/${props.product.id}`, {
+    router.put(`/customers/${props.customer.id}`, formData, {
         preserveScroll: "errors",
         preserveState: "errors",
         onSuccess: () => {
-            toast.success('Success', { description: 'Product deleted successfully!' });
+            toast.success('Success', { description: 'Customer updated successfully!' });
             isProcessing.value = false;
-            emit('product-form-closed'); // Close modal on success
+            emit('member-form-closed'); // Close modal on success
         },
         onError: (errors) => {
 
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to delete product.', { description: errors[firstErrorKey] });
+            toast.warning('Failed to update customer.', { description: errors[firstErrorKey] });
             isProcessing.value = false;
         },
         onFinish: () => {
@@ -48,8 +46,8 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <ProductForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
-            :card-title="'Delete Product'" :transaction-type="'delete'" :product="product" />
+        <CustomerForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+            :card-title="'Update Customer'" :transaction-type="'update'" :customer="customer" />
     </div>
 
 </template>

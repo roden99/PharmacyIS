@@ -48,7 +48,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <SupplierForm @saveSupplier="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+        <SupplierForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
             :card-title="'Delete Supplier'" :transaction-type="'delete'" :supplier="supplier" />
     </div>
 

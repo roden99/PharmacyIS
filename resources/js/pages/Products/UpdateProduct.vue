@@ -50,7 +50,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <ProductForm @save="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
+        <ProductForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
             :card-title="'Update Product'" :transaction-type="'update'" :product="product" :brands="brands" />
     </div>
 

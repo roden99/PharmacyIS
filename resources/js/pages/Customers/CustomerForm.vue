@@ -37,7 +37,7 @@ const props = defineProps({
         default: 'Form',
     },
 
-    supplier: {
+    customer: {
         type: Object,
         default: null,
     },
@@ -56,32 +56,67 @@ const confirmButtonText = computed(() => {
     return 'Yes';
 });
 
+const handleAlertClose = () => {
+    isDialogOpen.value = false;
+
+    if (props.transactionType === 'delete') {
+        emit('member-form-closed')
+    }
+};
+
+
+const isFormValidated = () => {
+    if (!form.first_name.toString().trim() ||
+        !form.last_name.toString().trim() ||
+        !form.phone.toString().trim() ||
+        !form.email.toString().trim()) {
+        toast.error('Fill up the forms properly');
+        return false;
+    }
+
+    return true;
+};
+
+
+const openConfirmDialog = () => {
+
+    form.clearErrors();
+    if (!isFormValidated()) return false;
+    isDialogOpen.value = true;
+    return true;
+
+};
+
+const buttonVariants = computed(() => {
+
+    return props.transactionType === 'create' ? 'default' : props.transactionType === 'update' ? 'default' : 'destructive';
+});
+
+
 
 
 
 const form = useForm({
 
-    //Supplier Information
-    company: props.customer?.company || '',
-    lastname: props.customer?.lastname || '',
-    firstname: props.customer?.firstname || '',
-    middlename: props.customer?.middlename || '',
-    contact_email: props.customer?.contact_email || '',
-    contact_phone: props.customer?.contact_phone || '',
+    //Customer Information
+    first_name: props.customer?.first_name || '',
+    last_name: props.customer?.last_name || '',
+    middle_name: props.customer?.middle_name || '',
+    email: props.customer?.email || '',
+    phone: props.customer?.phone || '',
     address: props.customer?.address || '',
 });
 
 
 
 
-const emit = defineEmits(['saveCustomer', 'member-form-closed']);
+const emit = defineEmits(['handleSubmit', 'member-form-closed']);
 
 
-
-const saveCustomer = () => {
+const handleSubmit = () => {
     try {
 
-        emit('saveCustomer', form.data());
+        emit('handleSubmit', form.data());
     } catch (error) {
         toast.error('ERROR', { description: error.message });
     }
@@ -97,57 +132,23 @@ const provinceOptions = ref([]);
 const cityOptions = ref([]);
 const barangayOptions = ref([]);
 
-// Fetch provinces on mount
-// onMounted(async () => {
-//     try {
-//         const response = await axios.get('/api/address/provinces');
-//         provinceOptions.value = response.data.map(p => ({
-//             value: p.province_id,
-//             label: p.name
-//         }));
-//     } catch (error) {
-//         console.error('Error loading provinces:', error);
-//     }
-// });
 
-// // Load cities when province changes
-// const loadCities = async (provinceId) => {
-//     if (!provinceId) return;
-//     try {
-//         const response = await axios.get(`/api/address/cities/${provinceId}`);
-//         cityOptions.value = response.data.map(c => ({
-//             value: c.city_id,
-//             label: c.name
-//         }));
-//         selectedCity.value = '';
-//         selectedBarangay.value = '';
-//         barangayOptions.value = [];
-//     } catch (error) {
-//         console.error('Error loading cities:', error);
-//     }
-// };
 
-// // Load barangays when city changes
-// const loadBarangays = async (cityId) => {
-//     if (!cityId) return;
-//     try {
-//         const response = await axios.get(`/api/address/barangays/${cityId}`);
-//         barangayOptions.value = response.data.map(b => ({
-//             value: b.code,
-//             label: b.name
-//         }));
-//         selectedBarangay.value = '';
-//     } catch (error) {
-//         console.error('Error loading barangays:', error);
-//     }
-// };
+const isDialogOpen = ref(false);
 
+onMounted(() => {
+
+
+
+    if (props.transactionType === 'delete') {
+        isDialogOpen.value = true;
+    }
+
+});
 
 </script>
 
 <template>
-    <!-- <FormCard v-show="!isDialogOpen" :card-title="cardTitle"> -->
-
     <FormCard :loading="isProcessing" :card-title="cardTitle">
         <form @submit.prevent="Submit" class="space-y-4">
 
@@ -157,31 +158,29 @@ const barangayOptions = ref([]);
                     <template #fieldGroups>
                         <!-- Customer Information -->
                         <FieldSet>
-                            <!-- <FieldLegend>Customer Information</FieldLegend> -->
-
                             <!-- Customer Input Fields Here -->
                             <FieldGroup class="rounded-lg border p-4">
 
                                 <div class="grid w-full grid-cols-15 gap-4">
 
                                     <Field class="col-span-15">
-                                        <FieldLabel class="font-normal">Customer Details:</FieldLabel>
+                                        <FieldLabel class="font-normal">Customer Name:</FieldLabel>
                                         <div class="grid grid-cols-3 gap-4">
-                                            <Input v-model="form.lastname" placeholder="Last Name" required />
-                                            <Input v-model="form.firstname" placeholder="First Name" required />
-                                            <Input v-model="form.middlename" placeholder="Middle Name" />
+                                            <Input v-model="form.last_name" placeholder="Last Name" required />
+                                            <Input v-model="form.first_name" placeholder="First Name" required />
+                                            <Input v-model="form.middle_name" placeholder="Middle Name" />
                                         </div>
                                     </Field>
 
                                     <Field class="col-span-7">
                                         <FieldLabel class=" font-normal">Phone Number:</FieldLabel>
-                                        <Input v-model="form.contact_phone" required />
+                                        <Input v-model="form.phone" required />
                                     </Field>
 
 
                                     <Field class="col-span-8">
                                         <FieldLabel class="font-normal">Email Address:</FieldLabel>
-                                        <Input v-model="form.contact_email" type="email" required />
+                                        <Input v-model="form.email" type="email" required />
                                     </Field>
 
 
@@ -206,13 +205,8 @@ const barangayOptions = ref([]);
                             </FieldGroup>
                         </FieldSet>
                     </template>
-
                 </BaseField>
-
-
             </div>
-
-
 
             <div class="flex justify-end space-x-2">
 
@@ -221,16 +215,49 @@ const barangayOptions = ref([]);
                 </BaseButton>
 
                 <BaseButton :loading="isProcessing" :text="confirmButtonText" variant="default" color="primary"
-                    type="button" @click="saveSupplier">
+                    type="button" @click="openConfirmDialog">
                 </BaseButton>
 
-
             </div>
-
         </form>
-
-
     </FormCard>
+
+    <BaseAlertDialog v-model:open="isDialogOpen" :loading="isProcessing">
+        <template #alertTitle>
+            <template v-if="transactionType === 'create'">
+                Are you sure you want to save?
+            </template>
+
+            <template v-if="transactionType === 'update'">
+                Are you sure you want to update?
+            </template>
+
+            <template v-if="transactionType === 'delete'">
+                Are you sure you want to delete?
+            </template>
+
+        </template>
+        <template #alertDescription>
+            <h4 class="font-semibold text-sm mb-2">Customer Details:</h4>
+            <div class="text-sm space-y-1">
+                <p><span class="font-medium">Name:</span> {{ form.first_name }} {{ form.middle_name }} {{ form.last_name
+                    }}</p>
+                <p><span class="font-medium">Email:</span> {{ form.email || 'N/A' }}</p>
+                <p><span class="font-medium">Phone:</span> {{ form.phone || 'N/A' }}</p>
+                <p v-if="form.address"><span class="font-medium">Address:</span> {{ form.address }}</p>
+            </div>
+        </template>
+
+        <template #alertFooter>
+
+            <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
+                @click="handleAlertClose" />
+
+            <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
+                @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
+
+        </template>
+    </BaseAlertDialog>
 
 
 

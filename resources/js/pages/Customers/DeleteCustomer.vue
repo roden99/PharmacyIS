@@ -48,7 +48,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <CustomerForm @saveCustomer="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+        <CustomerForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
             :card-title="'Delete Customer'" :transaction-type="'delete'" :customer="customer" />
     </div>
 

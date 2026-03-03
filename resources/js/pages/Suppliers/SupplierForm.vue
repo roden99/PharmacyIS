@@ -56,6 +56,44 @@ const confirmButtonText = computed(() => {
     return 'Yes';
 });
 
+const handleAlertClose = () => {
+    isDialogOpen.value = false;
+
+    if (props.transactionType === 'delete') {
+        emit('member-form-closed')
+    }
+};
+
+
+const isFormValidated = () => {
+    if (!form.company.toString().trim() ||
+        !form.lastname.toString().trim() ||
+        !form.firstname.toString().trim() ||
+        !form.contact_phone.toString().trim() ||
+        !form.contact_email.toString().trim()) {
+        toast.error('ERROR', { description: 'Please complete all required fields.' });
+        return false;
+    }
+
+    return true;
+};
+
+
+const openConfirmDialog = () => {
+
+    form.clearErrors();
+    if (!isFormValidated()) return false;
+    isDialogOpen.value = true;
+    return true;
+
+};
+
+const buttonVariants = computed(() => {
+
+    return props.transactionType === 'create' ? 'default' : props.transactionType === 'update' ? 'default' : 'destructive';
+});
+
+
 
 
 
@@ -74,14 +112,13 @@ const form = useForm({
 
 
 
-const emit = defineEmits(['saveSupplier', 'member-form-closed']);
+const emit = defineEmits(['handleSubmit', 'member-form-closed']);
 
 
-
-const saveSupplier = () => {
+const handleSubmit = () => {
     try {
 
-        emit('saveSupplier', form.data());
+        emit('handleSubmit', form.data());
     } catch (error) {
         toast.error('ERROR', { description: error.message });
     }
@@ -96,6 +133,20 @@ const selectedBarangay = ref('');
 const provinceOptions = ref([]);
 const cityOptions = ref([]);
 const barangayOptions = ref([]);
+
+
+
+const isDialogOpen = ref(false);
+
+onMounted(() => {
+
+
+
+    if (props.transactionType === 'delete') {
+        isDialogOpen.value = true;
+    }
+
+});
 
 // Fetch provinces on mount
 // onMounted(async () => {
@@ -225,7 +276,7 @@ const barangayOptions = ref([]);
                 </BaseButton>
 
                 <BaseButton :loading="isProcessing" :text="confirmButtonText" variant="default" color="primary"
-                    type="button" @click="saveSupplier">
+                    type="button" @click="openConfirmDialog">
                 </BaseButton>
 
 
@@ -235,6 +286,44 @@ const barangayOptions = ref([]);
 
 
     </FormCard>
+
+    <BaseAlertDialog v-model:open="isDialogOpen">
+        <template #alertTitle>
+            <template v-if="transactionType === 'create'">
+                Are you sure you want to save?
+            </template>
+
+            <template v-if="transactionType === 'update'">
+                Are you sure you want to update?
+            </template>
+
+            <template v-if="transactionType === 'delete'">
+                Are you sure you want to delete?
+            </template>
+
+        </template>
+        <template #alertDescription>
+            <h4 class="font-semibold text-sm mb-2">Supplier Details:</h4>
+            <div class="text-sm space-y-1">
+                <p><span class="font-medium">Company:</span> {{ form.company || 'N/A' }}</p>
+                <p><span class="font-medium">Contact Person:</span> {{ form.firstname }} {{ form.middlename }} {{
+                    form.lastname }}</p>
+                <p><span class="font-medium">Email:</span> {{ form.contact_email || 'N/A' }}</p>
+                <p><span class="font-medium">Phone:</span> {{ form.contact_phone || 'N/A' }}</p>
+                <p v-if="form.address"><span class="font-medium">Address:</span> {{ form.address }}</p>
+            </div>
+        </template>
+
+        <template #alertFooter>
+
+            <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
+                @click="handleAlertClose" />
+
+            <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
+                @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
+
+        </template>
+    </BaseAlertDialog>
 
 
 

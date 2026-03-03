@@ -56,12 +56,45 @@ const confirmButtonText = computed(() => {
     return 'Yes';
 });
 
+const handleAlertClose = () => {
+    isDialogOpen.value = false;
+
+    if (props.transactionType === 'delete') {
+        emit('form-closed')
+    }
+};
+
+
+const isFormValidated = () => {
+    if (!form.brandname.toString().trim()) {
+        toast.error('Fill up the forms properly');
+        return false;
+    }
+
+    return true;
+};
+
+
+const openConfirmDialog = () => {
+
+    form.clearErrors();
+    if (!isFormValidated()) return false;
+    isDialogOpen.value = true;
+    return true;
+
+};
+
+const buttonVariants = computed(() => {
+
+    return props.transactionType === 'create' ? 'default' : props.transactionType === 'update' ? 'default' : 'destructive';
+});
+
 
 
 
 const form = useForm({
 
-    //Supplier Information
+    //Brand Information
     brandname: props.brand?.brandname || '',
 
 });
@@ -69,18 +102,31 @@ const form = useForm({
 
 
 
-const emit = defineEmits(['save', 'form-closed']);
+const emit = defineEmits(['handleSubmit', 'form-closed']);
 
 
-
-const save = () => {
+const handleSubmit = () => {
     try {
 
-        emit('save', form.data());
+        emit('handleSubmit', form.data());
     } catch (error) {
         toast.error('ERROR', { description: error.message });
     }
 }
+
+
+
+const isDialogOpen = ref(false);
+
+onMounted(() => {
+
+
+
+    if (props.transactionType === 'delete') {
+        isDialogOpen.value = true;
+    }
+
+});
 
 
 
@@ -130,7 +176,7 @@ const save = () => {
                 </BaseButton>
 
                 <BaseButton :loading="isProcessing" :text="confirmButtonText" variant="default" color="primary"
-                    type="button" @click="save">
+                    type="button" @click="openConfirmDialog">
                 </BaseButton>
 
 
@@ -139,6 +185,39 @@ const save = () => {
         </form>
 
     </FormCard>
+
+    <BaseAlertDialog v-model:open="isDialogOpen">
+        <template #alertTitle>
+            <template v-if="transactionType === 'create'">
+                Are you sure you want to save?
+            </template>
+
+            <template v-if="transactionType === 'update'">
+                Are you sure you want to update?
+            </template>
+
+            <template v-if="transactionType === 'delete'">
+                Are you sure you want to delete?
+            </template>
+
+        </template>
+        <template #alertDescription>
+            <h4 class="font-semibold text-sm mb-2">Brand Details:</h4>
+            <div class="text-sm space-y-1">
+                <p><span class="font-medium">Brand Name:</span> {{ form.brandname || 'N/A' }}</p>
+            </div>
+        </template>
+
+        <template #alertFooter>
+
+            <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
+                @click="handleAlertClose" />
+
+            <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
+                @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
+
+        </template>
+    </BaseAlertDialog>
 
 
 

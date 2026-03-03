@@ -41,8 +41,11 @@ const displayItems = computed(() => {
         <HoverCardContent class="w-auto">
             <div class="flex flex-col space-y-2">
                 <div v-for="(item, index) in displayItems" :key="index" class="flex flex-col space-y-1">
-                    <p class="text-sm font-semibold">{{ item.label }}</p>
-                    <p class="text-xs text-muted-foreground">{{ item.value }}</p>
+                    <p class="text-xs text-muted-foreground">{{ item.label }}</p>
+                    <p class="text-sm font-semibold">{{ item.value }}</p>
+
+
+
                 </div>
             </div>
         </HoverCardContent>

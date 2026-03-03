@@ -1,51 +1,47 @@
 <script setup>
-import MemberForm from '@/pages/Suppliers/SupplierForm.vue'
+import CustomerForm from '@/pages/Customers/CustomerForm.vue'
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import CustomerForm from './CustomerForm.vue';
+
+const emit = defineEmits(['member-form-closed']);
+
+const handleClose = () => {
+    emit('member-form-closed');
+};
 
 
-// const emit = defineEmits(['member-form-closed']);
 
-// const isProcessing = ref(false);
-// const handleSubmit = (formData) => {
-
-//     isProcessing.value = true;
-//     router.post('/members', formData, {
-//         preserveScroll: "errors",
-//         preserveState: "errors",
-//         onSuccess: () => {
-//             toast.success('Success', { description: 'Member created successfully!' });
-//             isProcessing.value = false;
-//             emit('member-form-closed'); // Close modal on success
-//         },
-//         onError: (errors) => {
-//             const firstErrorKey = Object.keys(errors)[0];
-//             toast.warning('Failed to create member.', { description: errors[firstErrorKey] });
-//             isProcessing.value = false;
-//         },
-//         onFinish: () => {
-//             isProcessing.value = false;
-//         }
-//     });
-// };
+const isProcessing = ref(false);
+const handleSubmit = (formData) => {
+    isProcessing.value = true;
+    router.post('/customers', formData, {
+        preserveScroll: "errors",
+        preserveState: "errors",
+        onSuccess: () => {
+            toast.success('Success', { description: 'Customer created successfully!' });
+            isProcessing.value = false;
+            emit('member-form-closed'); // Close modal on success
+        },
+        onError: (errors) => {
+            console.log('asdadasd')
+            const firstErrorKey = Object.keys(errors)[0];
+            toast.warning('Failed to create customer.', { description: errors[firstErrorKey] });
+            isProcessing.value = false;
+        },
+        onFinish: () => {
+            isProcessing.value = false;
+        }
+    });
+};
 
 </script>
 <template>
 
 
     <div>
-        <CustomerForm :card-title="'New Customer'" />
-
-
+        <CustomerForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+            :card-title="'New Customer'" :transaction-type="'create'" />
     </div>
-    <!-- 
-    <div>
-        <MemberForm @saveMember="handleSubmit" @member-form-closed="emit('member-form-closed')"
-            :is-processing="isProcessing" :card-title="'New Member'" :transaction-type="'create'" />
-        :card-title='"New Member"' />
-
-    </div> -->
 
 </template>

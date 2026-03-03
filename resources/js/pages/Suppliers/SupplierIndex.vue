@@ -95,6 +95,17 @@ const handleAction = ({ type, data }) => {
 
 const showCreateSupplierModal = ref(false);
 
+// Format suppliers with concatenated representative name
+const formattedSuppliers = computed(() => {
+    // Handle both array and paginated object (with .data property)
+    const suppliersList = Array.isArray(props.suppliers) ? props.suppliers : props.suppliers?.data || [];
+
+    return suppliersList.map(supplier => ({
+        ...supplier,
+        representative: `${supplier.firstname || ''} ${supplier.middlename || ''} ${supplier.lastname || ''}`.trim()
+    }));
+});
+
 
 
 
@@ -105,11 +116,12 @@ const showCreateSupplierModal = ref(false);
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <!-- Use the reactive suppliers data -->
-            <BaseIndex IndexType="Suppliers" :data="props.suppliers"
+            <BaseIndex IndexType="Suppliers" :data="formattedSuppliers"
                 :columnDefs="columns.filter(col => col.isVisible === true)" :selectOptions="selectOptions"
                 v-model:selectModelValue="selectModelValue" @action="handleAction" :hover-fields="[
                     { field: 'company', label: 'Company' },
-                    { field: 'firstname', label: 'Representative' }
+                    { field: 'representative', label: 'Representative' },
+                    { field: 'contact_phone', label: 'Contact Phone' }
                 ]">
 
                 <Button variant="default" class="mr-2" @click="showCreateSupplierModal = true">
