@@ -70,7 +70,7 @@ const mainNavItems: NavItem[] = [
     icon: UsersRoundIcon,
     children: [
       {
-        title: 'List Customers',
+        title: 'Customers',
         href: '/customers',
         icon: UserRoundSearch,
       },
@@ -87,7 +87,7 @@ const mainNavItems: NavItem[] = [
     icon: Store,
     children: [
       {
-        title: 'Supplier Lists',
+        title: 'Suppliers',
         href: '/suppliers',
         icon: UserRoundSearch,
       },

@@ -13,7 +13,11 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Customers/CustomerIndex');
+        $customers = Customer::all(); // or paginate()
+    
+    return Inertia::render('Customers/CustomerIndex', [
+        'customers' => $customers
+    ]);
     }
 
     /**
