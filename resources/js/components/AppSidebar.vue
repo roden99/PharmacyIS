@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon, NotebookText, ShoppingCartIcon, BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2 } from 'lucide-vue-next';
+import { BookOpen, Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon, NotebookText, ShoppingCartIcon, BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2, Truck } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -39,30 +39,23 @@ const mainNavItems: NavItem[] = [
     icon: Boxes,
     children: [
       {
-        title: 'Item Lists',
-        href: '/products',
-        icon: ScanBarcode,
+        title: 'Warehouse Items',
+        href: '/warehouse-items',
+        icon: Package,
       },
-
-      {
-        title: 'Brand Lists',
-        href: '/brands',
-        icon: NotebookText,
-      },
-
     ],
   },
 
   {
-    title: 'Warehouse',
-    icon: Warehouse,
+    title: 'Purchase Order',
+    icon: ShoppingCart,
     href: '/under-construction',
   },
 
   {
-    title: 'Purchasing',
-    icon: ShoppingCart,
-    href: '/under-construction',
+    title: 'Delivery',
+    icon: Truck,
+    href: '/deliveries',
   },
 
   {
@@ -72,54 +65,46 @@ const mainNavItems: NavItem[] = [
   },
 
   {
-    title: 'Customers',
-    icon: UsersRoundIcon,
-    children: [
-      {
-        title: 'Customers',
-        href: '/customers',
-        icon: UserRoundSearch,
-      },
-      // {
-      //   title: 'Menu #2',
-      //   href: '/under-construction',
-      //   icon: LucideNotebookText,
-      // },
-    ],
-  },
-
-  {
-    title: 'Suppliers',
-    icon: Store,
-    children: [
-      {
-        title: 'Suppliers',
-        href: '/suppliers',
-        icon: UserRoundSearch,
-      },
-      // {
-      //   title: '########',
-      //   href: '/under-construction',
-      //   icon: LucideNotebookText,
-      // },
-    ],
-  },
-
-  {
     title: 'Reports',
     icon: NotebookText,
     href: '/under-construction',
   },
 
   {
-    title: 'User Management',
-    icon: UserRoundCog,
-    href: '/under-construction',
-  },
-  {
-    title: 'Settings',
+    title: 'Library',
     icon: Settings2,
-    href: '/under-construction',
+    children: [
+      {
+        title: 'Products',
+        href: '/products',
+        icon: Package,
+      },
+      {
+        title: 'Brands',
+        href: '/brands',
+        icon: NotebookText,
+      },
+      {
+        title: 'Warehouse',
+        href: '/warehouses',
+        icon: Warehouse,
+      },
+      {
+        title: 'Customers',
+        href: '/customers',
+        icon: UsersRoundIcon,
+      },
+      {
+        title: 'Suppliers',
+        href: '/suppliers',
+        icon: Store,
+      },
+      {
+        title: 'User Management',
+        href: '/under-construction',
+        icon: UserRoundCog,
+      },
+    ],
   },
 
 

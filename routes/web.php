@@ -6,13 +6,16 @@ use Inertia\Inertia;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\WarehouseController;
+use App\Http\Controllers\WarehouseItemController;
+use App\Http\Controllers\DeliveryController;
 
 Route::get('/login', function () {
     return Inertia::render('Login/Index');
 })->name('login');
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return redirect()->route('login');
 })->name('home');
 
 Route::get('dashboard', function () {
@@ -29,6 +32,9 @@ Route::resource('customers', CustomerController::class);
 
 Route::resource('brands', BrandController::class);
 Route::resource('products', ProductController::class);
+Route::resource('warehouses', WarehouseController::class);
+Route::resource('warehouse-items', WarehouseItemController::class);
+Route::resource('deliveries', DeliveryController::class);
 
 
 

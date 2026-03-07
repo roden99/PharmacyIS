@@ -241,7 +241,7 @@ onMounted(() => {
             <h4 class="font-semibold text-sm mb-2">Customer Details:</h4>
             <div class="text-sm space-y-1">
                 <p><span class="font-medium">Name:</span> {{ form.first_name }} {{ form.middle_name }} {{ form.last_name
-                    }}</p>
+                }}</p>
                 <p><span class="font-medium">Email:</span> {{ form.email || 'N/A' }}</p>
                 <p><span class="font-medium">Phone:</span> {{ form.phone || 'N/A' }}</p>
                 <p v-if="form.address"><span class="font-medium">Address:</span> {{ form.address }}</p>
