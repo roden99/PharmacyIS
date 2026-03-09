@@ -9,9 +9,9 @@ import { router, usePage, Head } from '@inertiajs/vue3';
 import { isNumberArray } from '@tanstack/vue-table';
 
 
-import CreateProduct from '@/pages/Products/CreateProduct.vue';
-import UpdateProduct from '@/pages/Products/UpdateProduct.vue';
-import DeleteProduct from '@/pages/Products/DeleteProduct.vue';
+import CreateWarehouseItem from '@/pages/WarehouseItems/CreateWarehouseItem.vue';
+import UpdateWarehouseItem from '@/pages/WarehouseItems/UpdateWarehouseItem.vue';
+import DeleteWarehouseItem from '@/pages/WarehouseItems/DeleteWarehouseItem.vue';
 
 
 const breadcrumbs = [
@@ -20,16 +20,15 @@ const breadcrumbs = [
         href: '/dashboard',
     },
     {
-        title: 'Product List',
-        href: '/products',
+        title: 'Warehouse Items',
+        href: '/warehouse-items',
     },
 ];
 
 
 
 const props = defineProps({
-    products: {
-        // type: Array,
+    warehouseItems: {
         required: true,
     },
 
@@ -38,7 +37,12 @@ const props = defineProps({
         required: true,
     },
 
-    brands: {
+    warehouses: {
+        type: Array,
+        default: () => []
+    },
+
+    products: {
         type: Array,
         default: () => []
     },
@@ -54,18 +58,18 @@ const selectModelValue = ref(
     selectOptions.length > 0 ? selectOptions[0].value : ''
 );
 
-const showCreateProductModal = ref(false);
+const showCreateWarehouseItemModal = ref(false);
 
-const showUpdateProductModal = ref(false);
-const showDeleteProductModal = ref(false);
-const selectedProduct = ref(null);
+const showUpdateWarehouseItemModal = ref(false);
+const showDeleteWarehouseItemModal = ref(false);
+const selectedWarehouseItem = ref(null);
 
 
 const handleAction = ({ type, data }) => {
 
     console.log('🎯 Action Clicked:', {
         actionType: type,
-        productData: data,
+        warehouseItemData: data,
         timestamp: new Date().toISOString(),
 
 
@@ -74,8 +78,8 @@ const handleAction = ({ type, data }) => {
     switch (type) {
         case 'edit':
             console.log('📄 Edit action for:', data);
-            showUpdateProductModal.value = true;
-            selectedProduct.value = data;
+            showUpdateWarehouseItemModal.value = true;
+            selectedWarehouseItem.value = data;
 
             break;
 
@@ -85,8 +89,8 @@ const handleAction = ({ type, data }) => {
 
 
         case 'delete':
-            showDeleteProductModal.value = true;
-            selectedProduct.value = data;
+            showDeleteWarehouseItemModal.value = true;
+            selectedWarehouseItem.value = data;
 
 
             // handleDelete(data.id);
@@ -107,31 +111,33 @@ const handleAction = ({ type, data }) => {
 
 <template>
 
-    <Head title="Products"/>
+    <Head title="Warehouse Items" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <!-- Use the reactive products data -->
-            <BaseIndex IndexType="Products" :data="props.products"
+            <!-- Use the reactive warehouse items data -->
+            <BaseIndex IndexType="Warehouse Items" :data="props.warehouseItems"
                 :columnDefs="columns.filter(col => col.isVisible === true)" :selectOptions="selectOptions"
                 v-model:selectModelValue="selectModelValue" @action="handleAction" :hover-fields="[
-                    { field: 'productname', label: 'Product Name' },
-                    { field: 'brand_name', label: 'Brand' }
+                    { field: 'warehouse_name', label: 'Warehouse' },
+                    { field: 'product_name', label: 'Product' },
+                    { field: 'quantity', label: 'Quantity' }
                 ]">
 
-                <Button variant="default" class="mr-2" @click="showCreateProductModal = true">
-                    New Product
+                <Button variant="default" class="mr-2" @click="showCreateWarehouseItemModal = true">
+                    New Item
                 </Button>
 
             </BaseIndex>
 
-            <CreateProduct v-if="showCreateProductModal" @form-closed="showCreateProductModal = false"
-                :brands="brands" />
+            <CreateWarehouseItem v-if="showCreateWarehouseItemModal" @form-closed="showCreateWarehouseItemModal = false"
+                :warehouses="warehouses" :products="products" />
 
-            <UpdateProduct v-if="showUpdateProductModal" :product="selectedProduct" :brands="brands"
-                @product-form-closed="showUpdateProductModal = false" />
+            <UpdateWarehouseItem v-if="showUpdateWarehouseItemModal" :warehouseItem="selectedWarehouseItem"
+                :warehouses="warehouses" :products="products"
+                @item-form-closed="showUpdateWarehouseItemModal = false" />
 
-            <DeleteProduct v-if="showDeleteProductModal" :product="selectedProduct"
-                @product-form-closed="showDeleteProductModal = false" />
+            <DeleteWarehouseItem v-if="showDeleteWarehouseItemModal" :warehouseItem="selectedWarehouseItem"
+                @item-form-closed="showDeleteWarehouseItemModal = false" />
 
 
         </div>

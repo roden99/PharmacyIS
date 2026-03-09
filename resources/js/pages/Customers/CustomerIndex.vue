@@ -93,12 +93,23 @@ const handleAction = ({ type, data }) => {
 // Format customers with concatenated full name
 const formattedCustomers = computed(() => {
     // Handle both array and paginated object (with .data property)
-    const customersList = Array.isArray(props.customers) ? props.customers : props.customers?.data || [];
+    const isArray = Array.isArray(props.customers);
+    const customersList = isArray ? props.customers : props.customers?.data || [];
 
-    return customersList.map(customer => ({
+    const formatted = customersList.map(customer => ({
         ...customer,
         fullname: `${customer.first_name || ''} ${customer.middle_name || ''} ${customer.last_name || ''}`.trim()
     }));
+
+    // If paginated, preserve pagination structure
+    if (!isArray && props.customers?.data) {
+        return {
+            ...props.customers,
+            data: formatted
+        };
+    }
+
+    return formatted;
 });
 
 

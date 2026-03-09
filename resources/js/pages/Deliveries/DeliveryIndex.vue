@@ -6,13 +6,10 @@ import BaseIndex from '@/components/BaseIndex.vue';
 import { onMounted, ref, computed, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { router, usePage, Head } from '@inertiajs/vue3';
-import { isNumberArray } from '@tanstack/vue-table';
 
-
-import CreateProduct from '@/pages/Products/CreateProduct.vue';
-import UpdateProduct from '@/pages/Products/UpdateProduct.vue';
-import DeleteProduct from '@/pages/Products/DeleteProduct.vue';
-
+import CreateDelivery from '@/pages/Deliveries/CreateDelivery.vue';
+import UpdateDelivery from '@/pages/Deliveries/UpdateDelivery.vue';
+import DeleteDelivery from '@/pages/Deliveries/DeleteDelivery.vue';
 
 const breadcrumbs = [
     {
@@ -20,16 +17,13 @@ const breadcrumbs = [
         href: '/dashboard',
     },
     {
-        title: 'Product List',
-        href: '/products',
+        title: 'Deliveries',
+        href: '/deliveries',
     },
 ];
 
-
-
 const props = defineProps({
-    products: {
-        // type: Array,
+    deliveries: {
         required: true,
     },
 
@@ -38,13 +32,11 @@ const props = defineProps({
         required: true,
     },
 
-    brands: {
+    suppliers: {
         type: Array,
         default: () => []
     },
-
 });
-
 
 const selectOptions = props.columns.filter(col => col.isParameter === true).map((s) => ({
     value: s.accessorKey,
@@ -54,85 +46,68 @@ const selectModelValue = ref(
     selectOptions.length > 0 ? selectOptions[0].value : ''
 );
 
-const showCreateProductModal = ref(false);
-
-const showUpdateProductModal = ref(false);
-const showDeleteProductModal = ref(false);
-const selectedProduct = ref(null);
-
+const showCreateDeliveryModal = ref(false);
+const showUpdateDeliveryModal = ref(false);
+const showDeleteDeliveryModal = ref(false);
+const selectedDelivery = ref(null);
 
 const handleAction = ({ type, data }) => {
-
     console.log('🎯 Action Clicked:', {
         actionType: type,
-        productData: data,
+        deliveryData: data,
         timestamp: new Date().toISOString(),
-
-
     });
 
     switch (type) {
         case 'edit':
             console.log('📄 Edit action for:', data);
-            showUpdateProductModal.value = true;
-            selectedProduct.value = data;
-
+            showUpdateDeliveryModal.value = true;
+            selectedDelivery.value = data;
             break;
 
         case 'download':
             console.log('📥 Download action for:', data);
             break;
 
-
         case 'delete':
-            showDeleteProductModal.value = true;
-            selectedProduct.value = data;
-
-
-            // handleDelete(data.id);
+            showDeleteDeliveryModal.value = true;
+            selectedDelivery.value = data;
             break;
-
 
         default:
             console.log(`❓ Unknown action "${type}" for:`, data);
     }
-
 };
-
-
-
 
 </script>
 
-
 <template>
 
-    <Head title="Products"/>
+    <Head title="Deliveries" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <!-- Use the reactive products data -->
-            <BaseIndex IndexType="Products" :data="props.products"
+            <BaseIndex IndexType="Deliveries" :data="props.deliveries"
                 :columnDefs="columns.filter(col => col.isVisible === true)" :selectOptions="selectOptions"
                 v-model:selectModelValue="selectModelValue" @action="handleAction" :hover-fields="[
-                    { field: 'productname', label: 'Product Name' },
-                    { field: 'brand_name', label: 'Brand' }
+                    { field: 'supplier_name', label: 'Supplier' },
+                    { field: 'delivery_date', label: 'Delivery Date' },
+                    { field: 'status', label: 'Status' }
                 ]">
 
-                <Button variant="default" class="mr-2" @click="showCreateProductModal = true">
-                    New Product
+                <Button variant="default" class="mr-2" @click="showCreateDeliveryModal = true">
+                    New Delivery
                 </Button>
 
             </BaseIndex>
 
-            <CreateProduct v-if="showCreateProductModal" @form-closed="showCreateProductModal = false"
-                :brands="brands" />
+            <CreateDelivery v-if="showCreateDeliveryModal" @form-closed="showCreateDeliveryModal = false"
+                :suppliers="suppliers" />
 
-            <UpdateProduct v-if="showUpdateProductModal" :product="selectedProduct" :brands="brands"
-                @product-form-closed="showUpdateProductModal = false" />
+            <UpdateDelivery v-if="showUpdateDeliveryModal" :delivery="selectedDelivery" :suppliers="suppliers"
+                @item-form-closed="showUpdateDeliveryModal = false" />
 
-            <DeleteProduct v-if="showDeleteProductModal" :product="selectedProduct"
-                @product-form-closed="showDeleteProductModal = false" />
-
+            <DeleteDelivery v-if="showDeleteDeliveryModal" :delivery="selectedDelivery"
+                @item-form-closed="showDeleteDeliveryModal = false" />
 
         </div>
     </AppLayout>

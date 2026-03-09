@@ -3,7 +3,7 @@ import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, Sideba
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
 
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 const props = defineProps<{
   items: NavItem[];
@@ -12,18 +12,20 @@ const props = defineProps<{
 const page = usePage();
 
 // Track open state for collapsible menus by title
-import { onMounted } from 'vue';
 const openMenus = ref<Record<string, boolean>>({});
 
 function toggleMenu(title: string) {
   openMenus.value[title] = !openMenus.value[title];
 }
 
-// Open all menus with children by default
+// Open parent menu if any of its children is currently active
 onMounted(() => {
   props.items.forEach(item => {
     if (item.children) {
-      openMenus.value[item.title] = true;
+      const hasActiveChild = item.children.some(child => child.href === page.url);
+      if (hasActiveChild) {
+        openMenus.value[item.title] = true;
+      }
     }
   });
 });

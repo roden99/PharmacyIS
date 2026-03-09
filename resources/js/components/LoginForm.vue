@@ -48,7 +48,8 @@ const submit = () => {
                             <FieldLabel for="email">
                                 Email
                             </FieldLabel>
-                            <Input id="email" v-model="form.email" type="email" placeholder="Enter your email" required />
+                            <Input id="email" v-model="form.email" type="email" placeholder="Enter your email"
+                                required />
                         </Field>
                         <Field>
                             <div class="flex items-center">
@@ -97,7 +98,7 @@ const submit = () => {
                         </Field>
                         <FieldDescription class="text-center">
                             Don't have an account?
-                            <a href="#">
+                            <a :href="route('register')">
                                 Sign up
                             </a>
                         </FieldDescription>

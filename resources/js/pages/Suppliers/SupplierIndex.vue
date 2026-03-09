@@ -98,12 +98,23 @@ const showCreateSupplierModal = ref(false);
 // Format suppliers with concatenated representative name
 const formattedSuppliers = computed(() => {
     // Handle both array and paginated object (with .data property)
-    const suppliersList = Array.isArray(props.suppliers) ? props.suppliers : props.suppliers?.data || [];
+    const isArray = Array.isArray(props.suppliers);
+    const suppliersList = isArray ? props.suppliers : props.suppliers?.data || [];
 
-    return suppliersList.map(supplier => ({
+    const formatted = suppliersList.map(supplier => ({
         ...supplier,
         representative: `${supplier.firstname || ''} ${supplier.middlename || ''} ${supplier.lastname || ''}`.trim()
     }));
+
+    // If paginated, preserve pagination structure
+    if (!isArray && props.suppliers?.data) {
+        return {
+            ...props.suppliers,
+            data: formatted
+        };
+    }
+
+    return formatted;
 });
 
 
