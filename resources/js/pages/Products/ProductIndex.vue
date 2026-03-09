@@ -107,7 +107,7 @@ const handleAction = ({ type, data }) => {
 
 <template>
 
-    <Head title="Products" />
+    <Head title="Products"/>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <!-- Use the reactive products data -->
