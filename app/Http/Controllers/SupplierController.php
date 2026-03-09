@@ -21,6 +21,8 @@ class SupplierController extends Controller
 
         $query = supplier::query();
 
+        // Show only active suppliers
+        $query->where('status', 'active');
 
         if (!empty($search) && strlen($search) >= 3 && !empty($column)) {
             $query->where($column, 'like', "{$search}%");
@@ -39,8 +41,9 @@ class SupplierController extends Controller
 
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'company', 'header' => 'COMPANY', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'tin', 'header' => 'TIN', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'full_name', 'header' => 'REPRESENTATIVE', 'isVisible' => true, 'isParameter' => false],
-            ['accessorKey' => 'contact_email', 'header' => 'EMAIL', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'contact_email', 'header' => 'EMAIL', 'false' => true, 'isParameter' => false],
             ['accessorKey' => 'contact_phone', 'header' => 'CONTACT #', 'isVisible' => true, 'isParameter' => true],
 
 
@@ -78,6 +81,7 @@ class SupplierController extends Controller
         $validated = $request->validate([
             // Supplier information
             'company' => 'required|string|max:255',
+            'tin' => 'nullable|string|max:50',
 
             // Contact person information
             'lastname' => 'required|string|max:255',
@@ -126,6 +130,7 @@ class SupplierController extends Controller
         $validated = $request->validate([
             // Supplier information
             'company' => 'required|string|max:255',
+            'tin' => 'nullable|string|max:50',
 
             // Contact person information
             'lastname' => 'required|string|max:255',
@@ -152,14 +157,18 @@ class SupplierController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * Soft delete by setting status to inactive.
      */
-    public function destroy($id)
-
-
+    public function destroy(Request $request, $id)
     {
-        $supplier = Supplier::findOrFail($id); // find supplier by ID or fail
-        $supplier->delete(); // delete supplier
+        $supplier = Supplier::findOrFail($id);
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully!');
+        // Soft delete: set status to inactive
+        $supplier->update([
+            'status' => 'inactive',
+            'updated_by' => $request->user()->id
+        ]);
+
+        return redirect()->route('suppliers.index')->with('success', 'Supplier deactivated successfully!');
     }
 }

@@ -18,6 +18,9 @@ class CustomerController extends Controller
 
         $query = Customer::query();
 
+        // Show only active customers
+        $query->where('status', 'active');
+
         if (!empty($search) && strlen($search) >= 3 && !empty($column)) {
             $query->where($column, 'like', "{$search}%");
         }
@@ -33,7 +36,7 @@ class CustomerController extends Controller
 
         $columns = [
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
-            ['accessorKey' => 'full_name', 'header' => 'CUSTOMER NAME', 'isVisible' => true, 'isParameter' => false],
+            ['accessorKey' => 'full_name', 'header' => 'CUSTOMER NAME', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'email', 'header' => 'EMAIL', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'phone', 'header' => 'PHONE', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'status', 'header' => 'STATUS', 'isVisible' => true, 'isParameter' => false],
@@ -111,12 +114,17 @@ class CustomerController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * Soft delete by setting status to inactive.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $customer = Customer::findOrFail($id);
-        $customer->delete();
 
-        return redirect()->route('customers.index')->with('success', 'Customer deleted successfully!');
+        // Soft delete: set status to inactive
+        $customer->update([
+            'status' => 'inactive'
+        ]);
+
+        return redirect()->route('customers.index')->with('success', 'Customer deactivated successfully!');
     }
 }

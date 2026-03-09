@@ -27,14 +27,14 @@ const handleSubmit = (formData) => {
         preserveScroll: "errors",
         preserveState: "errors",
         onSuccess: () => {
-            toast.success('Success', { description: 'Supplier deleted successfully!' });
+            toast.success('Success', { description: 'Supplier deactivated successfully!' });
             isProcessing.value = false;
             emit('member-form-closed'); // Close modal on success
         },
         onError: (errors) => {
 
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to delete supplier.', { description: errors[firstErrorKey] });
+            toast.warning('Failed to deactivate supplier.', { description: errors[firstErrorKey] });
             isProcessing.value = false;
         },
         onFinish: () => {

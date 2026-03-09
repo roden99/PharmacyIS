@@ -14,6 +14,7 @@ class product extends Model
         'isgeneric',
         'productname',
         'brand_id',
+        'product_unit_id',
         'status',
         'created_by',
         'updated_by',
@@ -30,6 +31,14 @@ class product extends Model
     public function brand()
     {
         return $this->belongsTo(brand::class);
+    }
+
+    /**
+     * Get the unit that the product belongs to.
+     */
+    public function unit()
+    {
+        return $this->belongsTo(ProductUnit::class, 'product_unit_id');
     }
 
     /**
