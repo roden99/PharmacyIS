@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\product;
 use App\Models\brand;
+use App\Models\ProductUnit;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -13,10 +14,35 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+
+        if (request()->wantsJson()) {
+            $search = $request->input('search');
+
+            $query = product::with(['brand', 'unit'])->where('status', true);
+
+            if (!empty($search)) {
+                $query->where('productname', 'like', "{$search}%");
+            }
+
+            return response()->json([
+                'products' => $query->orderBy('productname')->limit(10)->get(['id', 'productname', 'brand_id', 'product_unit_id', 'isgeneric'])->map(function ($product) {
+                    return [
+                        'id' => $product->id,
+                        'productname' => $product->productname,
+                        'brand_name' => $product->brand?->brandname ?? 'N/A',
+                        'unit_name' => $product->unit?->unit_name ?? 'N/A',
+                        'unit_code' => $product->unit?->unit_code ?? '',
+                        'isgeneric' => $product->isgeneric,
+                    ];
+                })
+            ]);
+        }
+
+
         $search = $request->input('search');
         $column = $request->input('column');
 
-        $query = product::with('brand');
+        $query = product::with(['brand', 'unit'])->where('status', true);
 
         if (!empty($search) && strlen($search) >= 3 && !empty($column)) {
             if ($column === 'brand_name') {
@@ -32,6 +58,7 @@ class ProductController extends Controller
             $product->status_text = $product->status ? 'Active' : 'Inactive';
             $product->generic_text = $product->isgeneric ? 'Generic' : 'Branded';
             $product->brand_name = $product->brand?->brandname ?? 'N/A';
+            $product->unit_name = $product->unit?->unit_name ?? 'N/A';
             return $product;
         });
 
@@ -39,6 +66,7 @@ class ProductController extends Controller
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'productname', 'header' => 'PRODUCT NAME', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'brand_name', 'header' => 'BRAND', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'unit_name', 'header' => 'UNIT', 'isVisible' => true, 'isParameter' => false],
             ['accessorKey' => 'generic_text', 'header' => 'TYPE', 'isVisible' => true, 'isParameter' => false],
             ['accessorKey' => 'status_text', 'header' => 'STATUS', 'isVisible' => true, 'isParameter' => false],
             ['accessorKey' => 'created_at', 'header' => 'CREATED AT', 'isVisible' => false, 'isParameter' => false],
@@ -47,7 +75,8 @@ class ProductController extends Controller
         return inertia('Products/ProductIndex', [
             'products' => $products,
             'columns' => $columns,
-            'brands' => brand::where('status', true)->orderBy('brandname')->get(['id', 'brandname'])
+            'brands' => brand::where('status', true)->orderBy('brandname')->get(['id', 'brandname']),
+            'productUnits' => ProductUnit::where('status', true)->orderBy('unit_name')->get(['id', 'unit_name', 'unit_code'])
         ]);
     }
 
@@ -68,6 +97,7 @@ class ProductController extends Controller
             // Product information
             'productname' => 'required|string|max:255',
             'brand_id' => 'nullable|exists:brands,id',
+            'product_unit_id' => 'required|exists:product_units,id',
             'isgeneric' => 'boolean',
         ]);
 
@@ -104,6 +134,7 @@ class ProductController extends Controller
             // Product information
             'productname' => 'required|string|max:255',
             'brand_id' => 'nullable|exists:brands,id',
+            'product_unit_id' => 'required|exists:product_units,id',
             'isgeneric' => 'boolean',
         ]);
 
@@ -121,8 +152,11 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $product = product::findOrFail($id); // find product by ID or fail
-        $product->delete(); // delete product
+        $product->update([
+            'status' => false,
+            'updated_by' => request()->user()->id
+        ]); // soft delete by setting status to false
 
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully!');
+        return redirect()->route('products.index')->with('success', 'Product deactivated successfully!');
     }
 }

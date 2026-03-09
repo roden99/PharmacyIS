@@ -52,7 +52,7 @@ const props = defineProps({
 const confirmButtonText = computed(() => {
     if (props.transactionType === 'create') return 'Save';
     if (props.transactionType === 'update') return 'Update';
-    if (props.transactionType === 'delete') return 'Delete';
+    if (props.transactionType === 'delete') return 'Deactivate';
     return 'Yes';
 });
 
@@ -197,32 +197,28 @@ onMounted(() => {
             </template>
 
             <template v-if="transactionType === 'delete'">
-                Are you sure you want to delete?
+                Are you sure you want to deactivate this warehouse?
             </template>
         </template>
 
         <template #alertDescription>
-            <template v-if="transactionType === 'create'">
-                This will create a new warehouse in the system.
-            </template>
-
-            <template v-if="transactionType === 'update'">
-                This will update the warehouse information.
-            </template>
-
-            <template v-if="transactionType === 'delete'">
-                This action cannot be undone. This will permanently delete the warehouse.
-            </template>
+            <h4 class="font-semibold text-sm mb-2">Warehouse Details:</h4>
+            <div class="text-sm space-y-1">
+                <p><span class="font-medium">Warehouse Name:</span> {{ form.warehousename || 'N/A' }}</p>
+            </div>
         </template>
 
-        <template #alertActions>
-            <BaseButton text="Cancel" variant="outline" color="secondary" type="button" @click="handleAlertClose">
-            </BaseButton>
+        <template #alertFooter>
 
-            <BaseButton :loading="isProcessing" :text="confirmButtonText" :variant="buttonVariants" color="primary"
-                type="button" @click="handleSubmit">
-            </BaseButton>
+            <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
+                @click="handleAlertClose" />
+
+            <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
+                @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
+
         </template>
     </BaseAlertDialog>
+
+
 
 </template>

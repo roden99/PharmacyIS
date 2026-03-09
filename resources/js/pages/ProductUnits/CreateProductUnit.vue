@@ -1,19 +1,8 @@
 <script setup>
-import ProductForm from './ProductForm.vue'
+import ProductUnitForm from './ProductUnitForm.vue'
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-
-const props = defineProps({
-    brands: {
-        type: Array,
-        default: () => []
-    },
-    productUnits: {
-        type: Array,
-        default: () => []
-    }
-});
 
 const emit = defineEmits(['form-closed']);
 
@@ -21,23 +10,20 @@ const handleClose = () => {
     emit('form-closed');
 };
 
-
-
 const isProcessing = ref(false);
 const handleSubmit = (formData) => {
     isProcessing.value = true;
-    router.post('/products', formData, {
+    router.post('/product-units', formData, {
         preserveScroll: "errors",
         preserveState: "errors",
         onSuccess: () => {
-            toast.success('Success', { description: 'Product created successfully!' });
+            toast.success('Success', { description: 'Product Unit created successfully!' });
             isProcessing.value = false;
-            emit('form-closed'); // Close modal on success
+            emit('form-closed');
         },
         onError: (errors) => {
-
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to create product.', { description: errors[firstErrorKey] });
+            toast.warning('Failed to create product unit.', { description: errors[firstErrorKey] });
             isProcessing.value = false;
         },
         onFinish: () => {
@@ -45,14 +31,10 @@ const handleSubmit = (formData) => {
         }
     });
 };
-
 </script>
 <template>
-
-
     <div>
-        <ProductForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
-            :card-title="'New Product'" :transaction-type="'create'" :brands="brands" :product-units="productUnits" />
+        <ProductUnitForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
+            :card-title="'New Product Unit'" :transaction-type="'create'" />
     </div>
-
 </template>

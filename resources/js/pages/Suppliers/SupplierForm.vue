@@ -52,7 +52,7 @@ const props = defineProps({
 const confirmButtonText = computed(() => {
     if (props.transactionType === 'create') return 'Save';
     if (props.transactionType === 'update') return 'Update';
-    if (props.transactionType === 'delete') return 'Delete';
+    if (props.transactionType === 'delete') return 'Deactivate';
     return 'Yes';
 });
 
@@ -101,6 +101,7 @@ const form = useForm({
 
     //Supplier Information
     company: props.supplier?.company || '',
+    tin: props.supplier?.tin || '',
     lastname: props.supplier?.lastname || '',
     firstname: props.supplier?.firstname || '',
     middlename: props.supplier?.middlename || '',
@@ -219,6 +220,7 @@ onMounted(() => {
                                         <Input v-model="form.company" required />
                                     </Field>
 
+
                                     <Field class="col-span-15">
                                         <FieldLabel class="font-normal">Contact Person:</FieldLabel>
                                         <div class="grid grid-cols-3 gap-4">
@@ -228,16 +230,25 @@ onMounted(() => {
                                         </div>
                                     </Field>
 
-                                    <Field class="col-span-7">
+                                    <Field class="col-span-5">
                                         <FieldLabel class=" font-normal">Phone Number:</FieldLabel>
                                         <Input v-model="form.contact_phone" required />
                                     </Field>
 
 
-                                    <Field class="col-span-8">
+                                    <Field class="col-span-5">
                                         <FieldLabel class="font-normal">Email Address:</FieldLabel>
                                         <Input v-model="form.contact_email" type="email" required />
                                     </Field>
+
+                                    <Field class="col-span-5">
+
+                                        <FieldLabel class="font-normal">TIN Number:</FieldLabel>
+                                        <Input v-model="form.tin" />
+
+                                    </Field>
+
+
 
 
                                     <Field class="col-span-15">
@@ -298,7 +309,7 @@ onMounted(() => {
             </template>
 
             <template v-if="transactionType === 'delete'">
-                Are you sure you want to delete?
+                Are you sure you want to deactivate this supplier?
             </template>
 
         </template>

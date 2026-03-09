@@ -18,6 +18,7 @@ class SupplierFactory extends Factory
     {
         return [
             'company' => $this->faker->company(),
+            'tin' => $this->faker->numerify('###-###-###-###'),
             'lastname' => $this->faker->lastName(),
             'firstname' => $this->faker->firstName(),
             'middlename' => $this->faker->firstName(),

@@ -1,9 +1,8 @@
 <script setup>
-import SupplierForm from '@/pages/Suppliers/SupplierForm.vue'
+import BrandForm from './BrandForm.vue'
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import BrandForm from './BrandForm.vue'
 
 const emit = defineEmits(['form-closed']);
 
