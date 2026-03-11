@@ -17,9 +17,7 @@ class ProductController extends Controller
 
         if (request()->wantsJson()) {
             $search = $request->input('search');
-
             $query = product::with(['brand', 'unit'])->where('status', true);
-
             if (!empty($search)) {
                 $query->where('productname', 'like', "{$search}%");
             }
@@ -41,6 +39,7 @@ class ProductController extends Controller
 
         $search = $request->input('search');
         $column = $request->input('column');
+
 
         $query = product::with(['brand', 'unit'])->where('status', true);
 
