@@ -36,9 +36,15 @@ class CustomerController extends Controller
 
         $columns = [
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
+<<<<<<< HEAD
             ['accessorKey' => 'full_name', 'header' => 'CUSTOMER NAME', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'email', 'header' => 'EMAIL', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'phone', 'header' => 'PHONE', 'isVisible' => true, 'isParameter' => true],
+=======
+            ['accessorKey' => 'full_name', 'header' => 'NAME', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'email', 'header' => 'EMAIL', 'isVisible' => true, 'isParameter' => false],
+            ['accessorKey' => 'phone', 'header' => 'PHONE', 'isVisible' => true, 'isParameter' => false],
+>>>>>>> 23637a755090fead21e7d704eb0e60ddd21a6ce7
             ['accessorKey' => 'status', 'header' => 'STATUS', 'isVisible' => true, 'isParameter' => false],
         ];
 
