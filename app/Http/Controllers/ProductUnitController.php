@@ -2,60 +2,56 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\brand;
+use App\Models\ProductUnit;
 use Illuminate\Http\Request;
 
-class BrandController extends Controller
+class ProductUnitController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
-
     public function index(Request $request)
     {
-
-
         if (request()->wantsJson()) {
             $search = $request->input('search');
 
-            $query = brand::where('status', 1);
+            $query = ProductUnit::where('status', 1);
 
             if (!empty($search)) {
-                $query->where('brandname', 'like', "{$search}%");
+                $query->where('unit_name', 'like', "{$search}%");
             }
             return response()->json([
-                'brands' => $query->orderBy('brandname')->limit(5)->get(['id', 'brandname'])
+                'productUnits' => $query->orderBy('unit_name')->limit(10)->get(['id', 'unit_name', 'unit_code'])
             ]);
         }
 
         $search = $request->input('search');
         $column = $request->input('column');
 
-        $query = brand::query();
+        $query = ProductUnit::query();
 
-        // Show only active brands
+        // Show only active product units
         $query->where('status', true);
 
         if (!empty($search) && strlen($search) >= 3 && !empty($column)) {
             $query->where($column, 'like', "{$search}%");
         }
 
-        $brands = $query->orderBy('created_at', 'desc')->paginate(15)->through(function ($brand) {
-            $brand->status_text = $brand->status ? 'Active' : 'Inactive';
-            return $brand;
+        $productUnits = $query->orderBy('created_at', 'desc')->paginate(15)->through(function ($productUnit) {
+            $productUnit->status_text = $productUnit->status ? 'Active' : 'Inactive';
+            return $productUnit;
         });
 
         $columns = [
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
-            ['accessorKey' => 'brandname', 'header' => 'BRAND NAME', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'unit_name', 'header' => 'UNIT NAME', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'unit_code', 'header' => 'UNIT CODE', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'status_text', 'header' => 'STATUS', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'created_at', 'header' => 'CREATED AT', 'isVisible' => false, 'isParameter' => false],
         ];
 
-
-        return inertia('Brands/BrandIndex', [
-            'brands' => $brands,
+        return inertia('ProductUnits/ProductUnitIndex', [
+            'productUnits' => $productUnits,
             'columns' => $columns
         ]);
     }
@@ -68,31 +64,28 @@ class BrandController extends Controller
         //
     }
 
-
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // Brand information
-            'brandname' => 'required|string|max:255',
-
+            'unit_name' => 'required|string|max:255',
+            'unit_code' => 'nullable|string|max:50',
         ]);
 
         // Add system-generated fields
         $validated['created_by'] = $request->user()->id;
 
+        ProductUnit::create($validated);
 
-        brand::create($validated);
-
-        return redirect()->route('brands.index')->with('success', 'Brand created successfully!');
+        return redirect()->route('product-units.index')->with('success', 'Product Unit created successfully!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(brand $brand)
+    public function show(ProductUnit $productUnit)
     {
         //
     }
@@ -100,7 +93,7 @@ class BrandController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(brand $brand)
+    public function edit(ProductUnit $productUnit)
     {
         //
     }
@@ -108,19 +101,19 @@ class BrandController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, brand $brand)
+    public function update(Request $request, ProductUnit $productUnit)
     {
         $validated = $request->validate([
-            // Brand information
-            'brandname' => 'required|string|max:255',
+            'unit_name' => 'required|string|max:255',
+            'unit_code' => 'nullable|string|max:50',
         ]);
 
         // Add updated_by field
         $validated['updated_by'] = $request->user()->id;
 
-        $brand->update($validated);
+        $productUnit->update($validated);
 
-        return redirect()->route('brands.index')->with('success', 'Brand updated successfully!');
+        return redirect()->route('product-units.index')->with('success', 'Product Unit updated successfully!');
     }
 
     /**
@@ -129,14 +122,14 @@ class BrandController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $brand = brand::findOrFail($id);
+        $productUnit = ProductUnit::findOrFail($id);
 
         // Soft delete: set status to inactive (false)
-        $brand->update([
+        $productUnit->update([
             'status' => false,
             'updated_by' => $request->user()->id
         ]);
 
-        return redirect()->route('brands.index')->with('success', 'Brand deactivated successfully!');
+        return redirect()->route('product-units.index')->with('success', 'Product Unit deactivated successfully!');
     }
 }

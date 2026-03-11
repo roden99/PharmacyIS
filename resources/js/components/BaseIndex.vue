@@ -120,7 +120,7 @@ const computedHoverItems = (rowData) => {
 const getActionsForIndex = (indexType) => {
     const actionMap = {
         'Members': ['verifyEligibility', 'edit', 'delete'],
-        'Products': ['view', 'edit', 'copy'],
+        'Products': ['edit', 'delete'],
         'Orders': ['view', 'download', 'add'],
         'Patients': ['view', 'edit', 'delete'],
         'Users': ['view', 'edit', 'delete'],

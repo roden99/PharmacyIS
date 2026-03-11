@@ -52,7 +52,7 @@ const props = defineProps({
 const confirmButtonText = computed(() => {
     if (props.transactionType === 'create') return 'Save';
     if (props.transactionType === 'update') return 'Update';
-    if (props.transactionType === 'delete') return 'Delete';
+    if (props.transactionType === 'delete') return 'Deactivate';
     return 'Yes';
 });
 
@@ -233,7 +233,7 @@ onMounted(() => {
             </template>
 
             <template v-if="transactionType === 'delete'">
-                Are you sure you want to delete?
+                Are you sure you want to deactivate this customer?
             </template>
 
         </template>
@@ -241,7 +241,7 @@ onMounted(() => {
             <h4 class="font-semibold text-sm mb-2">Customer Details:</h4>
             <div class="text-sm space-y-1">
                 <p><span class="font-medium">Name:</span> {{ form.first_name }} {{ form.middle_name }} {{ form.last_name
-                }}</p>
+                    }}</p>
                 <p><span class="font-medium">Email:</span> {{ form.email || 'N/A' }}</p>
                 <p><span class="font-medium">Phone:</span> {{ form.phone || 'N/A' }}</p>
                 <p v-if="form.address"><span class="font-medium">Address:</span> {{ form.address }}</p>

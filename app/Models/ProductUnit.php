@@ -5,27 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class supplier extends Model
+class ProductUnit extends Model
 {
-    /** @use HasFactory<\Database\Factories\SupplierFactory> */
+    /** @use HasFactory<\Database\Factories\ProductUnitFactory> */
     use HasFactory;
 
     protected $fillable = [
-        'company',
-        'tin',
-        'lastname',
-        'firstname',
-        'middlename',
-        'contact_email',
-        'contact_phone',
-        'address',
+        'unit_name',
+        'unit_code',
         'status',
         'created_by',
         'updated_by',
     ];
 
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
     /**
-     * Get the user who created this supplier.
+     * Get the products for the product unit.
+     */
+    public function products()
+    {
+        return $this->hasMany(product::class);
+    }
+
+    /**
+     * Get the user who created the product unit.
      */
     public function creator()
     {
@@ -33,7 +39,7 @@ class supplier extends Model
     }
 
     /**
-     * Get the user who last updated this supplier.
+     * Get the user who last updated the product unit.
      */
     public function updater()
     {

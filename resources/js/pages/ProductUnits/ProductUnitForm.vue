@@ -1,52 +1,31 @@
 <script setup>
 import FormCard from '@/components/FormCard.vue';
-import BaseSelect from '@/components/ui/BaseSelect.vue';
-
-import InputError from '@/components/InputError.vue';
 import BaseAlertDialog from '@/components/ui/BaseAlertDialog.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, ref, computed, version } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { toast } from 'vue-sonner';
-import axios from 'axios';
-
-
-import { CalendarDate, fromDate, getLocalTimeZone } from '@internationalized/date';
-import BaseDatePick from '@/components/ui/BaseDatePick.vue';
-import { useDateFormatter } from '@/composables/useDateFormatter';
-import { normalizeDate, set } from '@vueuse/core';
-import BaseCombobox from '@/components/ui/BaseCombobox.vue';
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from '@/components/ui/field';
-import BaseTab from '@/components/BaseTab.vue'
+import { Field, FieldGroup, FieldLabel, FieldSet } from '@/components/ui/field';
 import BaseField from '@/components/BaseField.vue';
 
-
-
-
 const props = defineProps({
-
     isProcessing: {
         type: Boolean,
         default: false,
     },
-
     cardTitle: {
         type: String,
         default: 'Form',
     },
-
-    brand: {
+    productUnit: {
         type: Object,
         default: null,
     },
-
     transactionType: {
         type: String,
         default: 'create',
     },
-
 });
 
 const confirmButtonText = computed(() => {
@@ -58,132 +37,87 @@ const confirmButtonText = computed(() => {
 
 const handleAlertClose = () => {
     isDialogOpen.value = false;
-
     if (props.transactionType === 'delete') {
         emit('form-closed')
     }
 };
 
-
 const isFormValidated = () => {
-    if (!form.brandname.toString().trim()) {
+    if (!form.unit_name.toString().trim()) {
         toast.error('Fill up the forms properly');
         return false;
     }
-
     return true;
 };
 
-
 const openConfirmDialog = () => {
-
     form.clearErrors();
     if (!isFormValidated()) return false;
     isDialogOpen.value = true;
     return true;
-
 };
 
 const buttonVariants = computed(() => {
-
     return props.transactionType === 'create' ? 'default' : props.transactionType === 'update' ? 'default' : 'destructive';
 });
 
-
-
-
 const form = useForm({
-
-    //Brand Information
-    brandname: props.brand?.brandname || '',
-
+    unit_name: props.productUnit?.unit_name || '',
+    unit_code: props.productUnit?.unit_code || '',
 });
-
-
-
 
 const emit = defineEmits(['handleSubmit', 'form-closed']);
 
-
 const handleSubmit = () => {
     try {
-
         emit('handleSubmit', form.data());
     } catch (error) {
         toast.error('ERROR', { description: error.message });
     }
 }
 
-
-
 const isDialogOpen = ref(false);
 
 onMounted(() => {
-
-
-
     if (props.transactionType === 'delete') {
         isDialogOpen.value = true;
     }
-
 });
-
-
-
 </script>
 
 <template>
-    <!-- <FormCard v-show="!isDialogOpen" :card-title="cardTitle"> -->
-
     <FormCard :loading="isProcessing" :card-title="cardTitle" max-width="max-w-lg">
         <form @submit.prevent="Submit" class="space-y-4">
-
             <div class="w-full space-y-6">
-
                 <BaseField>
                     <template #fieldGroups>
-                        <!-- Supplier Information -->
                         <FieldSet>
-                            <!-- <FieldLegend>Supplier Information</FieldLegend> -->
-
-                            <!-- Supplier Input Fields Here -->
                             <FieldGroup class="rounded-lg border p-4">
-
                                 <div class="grid w-full grid-cols-15 gap-4">
                                     <Field class="col-span-15">
-                                        <FieldLabel class="font-normal">Brand Name:</FieldLabel>
-                                        <Input v-model="form.brandname" required />
+                                        <FieldLabel class="font-normal">Unit Name:</FieldLabel>
+                                        <Input v-model="form.unit_name" required />
                                     </Field>
-
-
-
+                                    <Field class="col-span-15">
+                                        <FieldLabel class="font-normal">Unit Code (Optional):</FieldLabel>
+                                        <Input v-model="form.unit_code" />
+                                    </Field>
                                 </div>
                             </FieldGroup>
                         </FieldSet>
                     </template>
-
                 </BaseField>
-
-
             </div>
 
-
-
             <div class="flex justify-end space-x-2">
-
                 <BaseButton text="Cancel" variant="outline" color="secondary" type="button"
                     @click="emit('form-closed')">
                 </BaseButton>
-
                 <BaseButton :loading="isProcessing" :text="confirmButtonText" variant="default" color="primary"
                     type="button" @click="openConfirmDialog">
                 </BaseButton>
-
-
             </div>
-
         </form>
-
     </FormCard>
 
     <BaseAlertDialog v-model:open="isDialogOpen">
@@ -191,34 +125,26 @@ onMounted(() => {
             <template v-if="transactionType === 'create'">
                 Are you sure you want to save?
             </template>
-
             <template v-if="transactionType === 'update'">
                 Are you sure you want to update?
             </template>
-
             <template v-if="transactionType === 'delete'">
-                Are you sure you want to deactivate this brand?
+                Are you sure you want to deactivate this product unit?
             </template>
-
         </template>
         <template #alertDescription>
-            <h4 class="font-semibold text-sm mb-2">Brand Details:</h4>
+            <h4 class="font-semibold text-sm mb-2">Product Unit Details:</h4>
             <div class="text-sm space-y-1">
-                <p><span class="font-medium">Brand Name:</span> {{ form.brandname || 'N/A' }}</p>
+                <p><span class="font-medium">Unit Name:</span> {{ form.unit_name || 'N/A' }}</p>
+                <p v-if="form.unit_code"><span class="font-medium">Unit Code:</span> {{ form.unit_code }}</p>
             </div>
         </template>
 
         <template #alertFooter>
-
             <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
                 @click="handleAlertClose" />
-
             <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
                 @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
-
         </template>
     </BaseAlertDialog>
-
-
-
 </template>

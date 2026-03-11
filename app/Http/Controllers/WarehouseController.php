@@ -17,6 +17,9 @@ class WarehouseController extends Controller
 
         $query = warehouse::query();
 
+        // Show only active warehouses
+        $query->where('status', true);
+
         if (!empty($search) && strlen($search) >= 3 && !empty($column)) {
             $query->where($column, 'like', "{$search}%");
         }
@@ -29,7 +32,7 @@ class WarehouseController extends Controller
         $columns = [
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'warehousename', 'header' => 'WAREHOUSE NAME', 'isVisible' => true, 'isParameter' => true],
-            ['accessorKey' => 'status_text', 'header' => 'STATUS', 'isVisible' => true, 'isParameter' => false],
+            ['accessorKey' => 'status_text', 'header' => 'STATUS', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'created_at', 'header' => 'CREATED AT', 'isVisible' => false, 'isParameter' => false],
         ];
 
@@ -101,12 +104,18 @@ class WarehouseController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     * Soft delete by setting status to inactive.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $warehouse = warehouse::findOrFail($id); // find warehouse by ID or fail
-        $warehouse->delete(); // delete warehouse
+        $warehouse = warehouse::findOrFail($id);
 
-        return redirect()->route('warehouses.index')->with('success', 'Warehouse deleted successfully!');
+        // Soft delete: set status to inactive (false)
+        $warehouse->update([
+            'status' => false,
+            'updated_by' => $request->user()->id
+        ]);
+
+        return redirect()->route('warehouses.index')->with('success', 'Warehouse deactivated successfully!');
     }
 }

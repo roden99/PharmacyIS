@@ -27,14 +27,14 @@ const handleSubmit = (formData) => {
         preserveScroll: "errors",
         preserveState: "errors",
         onSuccess: () => {
-            toast.success('Success', { description: 'Brand deleted successfully!' });
+            toast.success('Success', { description: 'Brand deactivated successfully!' });
             isProcessing.value = false;
             emit('brand-form-closed'); // Close modal on success
         },
         onError: (errors) => {
 
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to delete brand.', { description: errors[firstErrorKey] });
+            toast.warning('Failed to deactivate brand.', { description: errors[firstErrorKey] });
             isProcessing.value = false;
         },
         onFinish: () => {

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\WarehouseItemController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\ProductUnitController;
 
 Route::get('/login', function () {
     return Inertia::render('Login/Index');
@@ -31,6 +32,7 @@ Route::resource('suppliers', SupplierController::class);
 Route::resource('customers', CustomerController::class);
 
 Route::resource('brands', BrandController::class);
+Route::resource('product-units', ProductUnitController::class);
 Route::resource('products', ProductController::class);
 Route::resource('warehouses', WarehouseController::class);
 Route::resource('warehouse-items', WarehouseItemController::class);

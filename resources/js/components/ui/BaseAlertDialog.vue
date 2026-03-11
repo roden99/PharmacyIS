@@ -23,13 +23,13 @@ const emit = defineEmits(['update:open']);
                 <AlertDialogDescription>
                     <div class="space-y-2">
                         <!-- ✅ Description Box with Black Font -->
-                        <div class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
-                            <div class="text-black">
-                                <slot name="alertDescription">
-                                    <p class="text-black">Please confirm this action.</p>
-                                </slot>
-                            </div>
+                        <!-- <div class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"> -->
+                        <div>
+                            <slot name="alertDescription">
+                                <p>Please confirm this action.</p>
+                            </slot>
                         </div>
+                        <!-- </div> -->
                     </div>
                 </AlertDialogDescription>
             </AlertDialogHeader>

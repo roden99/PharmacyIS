@@ -27,14 +27,14 @@ const handleSubmit = (formData) => {
         preserveScroll: "errors",
         preserveState: "errors",
         onSuccess: () => {
-            toast.success('Success', { description: 'Warehouse deleted successfully!' });
+            toast.success('Success', { description: 'Warehouse deactivated successfully!' });
             isProcessing.value = false;
             emit('warehouse-form-closed'); // Close modal on success
         },
         onError: (errors) => {
 
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to delete warehouse.', { description: errors[firstErrorKey] });
+            toast.warning('Failed to deactivate warehouse.', { description: errors[firstErrorKey] });
             isProcessing.value = false;
         },
         onFinish: () => {

@@ -43,6 +43,11 @@ const props = defineProps({
         default: () => []
     },
 
+    productUnits: {
+        type: Array,
+        default: () => []
+    },
+
 });
 
 
@@ -124,11 +129,11 @@ const handleAction = ({ type, data }) => {
 
             </BaseIndex>
 
-            <CreateProduct v-if="showCreateProductModal" @form-closed="showCreateProductModal = false"
-                :brands="brands" />
+            <CreateProduct v-if="showCreateProductModal" @form-closed="showCreateProductModal = false" :brands="brands"
+                :product-units="productUnits" />
 
             <UpdateProduct v-if="showUpdateProductModal" :product="selectedProduct" :brands="brands"
-                @product-form-closed="showUpdateProductModal = false" />
+                :product-units="productUnits" @product-form-closed="showUpdateProductModal = false" />
 
             <DeleteProduct v-if="showDeleteProductModal" :product="selectedProduct"
                 @product-form-closed="showDeleteProductModal = false" />

@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon, NotebookText, ShoppingCartIcon, BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2, Truck } from 'lucide-vue-next';
+import { BookOpen, Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon, NotebookText, ShoppingCartIcon, BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2, Truck, ClipboardList, Ruler } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -39,7 +39,7 @@ const mainNavItems: NavItem[] = [
     icon: Boxes,
     children: [
       {
-        title: 'Warehouse Items',
+        title: 'Product List',
         href: '/warehouse-items',
         icon: Package,
       },
@@ -49,13 +49,19 @@ const mainNavItems: NavItem[] = [
   {
     title: 'Purchase Order',
     icon: ShoppingCart,
-    href: '/under-construction',
+    children: [
+      {
+        title: 'Delivery',
+        href: '/deliveries',
+        icon: Truck,
+      },
+    ],
   },
 
   {
-    title: 'Delivery',
-    icon: Truck,
-    href: '/deliveries',
+    title: 'Sales Order',
+    icon: ClipboardList,
+    href: '/under-construction',
   },
 
   {
@@ -78,6 +84,11 @@ const mainNavItems: NavItem[] = [
         title: 'Products',
         href: '/products',
         icon: Package,
+      },
+      {
+        title: 'Product Units',
+        href: '/product-units',
+        icon: Ruler,
       },
       {
         title: 'Brands',
