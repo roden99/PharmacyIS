@@ -14,15 +14,21 @@ class ProductUnitController extends Controller
     {
         if (request()->wantsJson()) {
             $search = $request->input('search');
+            $includeId = $request->input('include_id');
 
             $query = ProductUnit::where('status', 1);
 
             if (!empty($search)) {
                 $query->where('unit_name', 'like', "{$search}%");
             }
-            return response()->json([
-                'productUnits' => $query->orderBy('unit_name')->limit(10)->get(['id', 'unit_name', 'unit_code'])
-            ]);
+            $results = $query->orderBy('unit_name')->limit(5)->get(['id', 'unit_name']);
+
+            if ($includeId && !$results->contains('id', (int)$includeId)) {
+                $extra = ProductUnit::where('id', (int)$includeId)->first(['id', 'unit_name']);
+                if ($extra) $results->prepend($extra);
+            }
+
+            return response()->json(['productUnits' => $results]);
         }
 
         $search = $request->input('search');
@@ -45,7 +51,6 @@ class ProductUnitController extends Controller
         $columns = [
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'unit_name', 'header' => 'UNIT NAME', 'isVisible' => true, 'isParameter' => true],
-            ['accessorKey' => 'unit_code', 'header' => 'UNIT CODE', 'isVisible' => true, 'isParameter' => true],
             ['accessorKey' => 'status_text', 'header' => 'STATUS', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'created_at', 'header' => 'CREATED AT', 'isVisible' => false, 'isParameter' => false],
         ];
@@ -71,13 +76,16 @@ class ProductUnitController extends Controller
     {
         $validated = $request->validate([
             'unit_name' => 'required|string|max:255',
-            'unit_code' => 'nullable|string|max:50',
         ]);
 
         // Add system-generated fields
         $validated['created_by'] = $request->user()->id;
 
-        ProductUnit::create($validated);
+        $productUnit = ProductUnit::create($validated);
+
+        if ($request->expectsJson()) {
+            return response()->json(['productUnit' => $productUnit]);
+        }
 
         return redirect()->route('product-units.index')->with('success', 'Product Unit created successfully!');
     }
@@ -105,7 +113,6 @@ class ProductUnitController extends Controller
     {
         $validated = $request->validate([
             'unit_name' => 'required|string|max:255',
-            'unit_code' => 'nullable|string|max:50',
         ]);
 
         // Add updated_by field

@@ -4,15 +4,14 @@ import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 
-const emit = defineEmits(['member-form-closed']);
-
-const handleClose = () => {
-    emit('member-form-closed');
-};
-
-
-
+const emit = defineEmits(['form-closed']);
 const isProcessing = ref(false);
+
+
+
+
+
+
 const handleSubmit = (formData) => {
     isProcessing.value = true;
     router.post('/suppliers', formData, {
@@ -40,7 +39,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <SupplierForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+        <SupplierForm @handleSubmit="handleSubmit" @form-closed="emit('form-closed')" :is-processing="isProcessing"
             :card-title="'New Supplier'" :transaction-type="'create'" />
     </div>
 

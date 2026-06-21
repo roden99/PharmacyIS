@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon, NotebookText, ShoppingCartIcon, BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2, Truck, ClipboardList, Ruler } from 'lucide-vue-next';
+import { BookOpen, Boxes, Warehouse, Folder, Settings2Icon, UserRoundCogIcon, Store, UsersRoundIcon, NotebookText, ShoppingCartIcon, BaggageClaim, LayoutGrid, LucideNotebookText, ScanBarcode, Package, UserCheck, UserRoundSearch, UsersRound, ShoppingCart, UserRoundCog, Settings2, Truck, ClipboardList, Ruler, Zap, Pill, Notebook, BriefcaseMedical } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -35,34 +35,38 @@ const mainNavItems: NavItem[] = [
   },
 
   {
+
     title: 'Inventory',
-    icon: Boxes,
-    children: [
-      {
-        title: 'Product List',
-        href: '/warehouse-items',
-        icon: Package,
-      },
-    ],
+    href: '/products',
+    icon: Package,
+
   },
 
   {
-    title: 'Purchase Order',
-    icon: ShoppingCart,
-    children: [
-      {
-        title: 'Delivery',
-        href: '/deliveries',
-        icon: Truck,
-      },
-    ],
+
+    title: 'Stock Receiving',
+    href: '/deliveries',
+    icon: Truck,
+
+
   },
 
   {
-    title: 'Sales Order',
-    icon: ClipboardList,
-    href: '/under-construction',
+
+    title: 'Sales Orders',
+    href: '/sales-orders',
+    icon: Package,
+
   },
+
+  {
+    title: 'Customer Accounts',
+    href: '/customer-accounts',
+    icon: UserCheck,
+  },
+
+
+
 
   {
     title: 'Stock Movement',
@@ -80,11 +84,11 @@ const mainNavItems: NavItem[] = [
     title: 'Library',
     icon: Settings2,
     children: [
-      {
-        title: 'Products',
-        href: '/products',
-        icon: Package,
-      },
+      // {
+      //   title: 'Products',
+      //   href: '/products',
+      //   icon: Package,
+      // },
       {
         title: 'Product Units',
         href: '/product-units',
@@ -94,6 +98,21 @@ const mainNavItems: NavItem[] = [
         title: 'Brands',
         href: '/brands',
         icon: NotebookText,
+      },
+      // {
+      //   title: 'Strengths',
+      //   href: '/strengths',
+      //   icon: Zap,
+      // },
+      {
+        title: 'Drug Forms',
+        href: '/drugforms',
+        icon: Pill,
+      },
+      {
+        title: 'Product Types',
+        href: '/product-types',
+        icon: BriefcaseMedical,
       },
       {
         title: 'Warehouse',
@@ -111,13 +130,17 @@ const mainNavItems: NavItem[] = [
         icon: Store,
       },
       {
+        title: 'Sales Accounts',
+        href: '/sales-accounts',
+        icon: Notebook,
+      },
+      {
         title: 'User Management',
         href: '/under-construction',
         icon: UserRoundCog,
       },
     ],
   },
-
 
 ];
 </script>

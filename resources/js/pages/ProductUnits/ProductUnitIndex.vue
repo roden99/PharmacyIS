@@ -75,11 +75,10 @@ const handleAction = ({ type, data }) => {
             <BaseIndex IndexType="Product Units" :data="props.productUnits"
                 :columnDefs="columns.filter(col => col.isVisible === true)" :selectOptions="selectOptions"
                 v-model:selectModelValue="selectModelValue" @action="handleAction" :hover-fields="[
-                    { field: 'unit_name', label: 'Unit Name' },
-                    { field: 'unit_code', label: 'Unit Code' }
+                    { field: 'unit_name', label: 'Unit Name' }
                 ]">
                 <Button variant="default" class="mr-2" @click="showCreateProductUnitModal = true">
-                    New Product Unit
+                    New Unit
                 </Button>
             </BaseIndex>
 

@@ -11,6 +11,7 @@ class Customer extends Model
     use HasFactory;
 
     protected $fillable = [
+        'company',
         'first_name',
         'last_name',
         'middle_name',
@@ -18,5 +19,11 @@ class Customer extends Model
         'phone',
         'address',
         'status',
+        'is_drugstore',
     ];
+
+    public function salesAccounts()
+    {
+        return $this->belongsToMany(SalesAccount::class, 'customer_sales_account')->withTimestamps();
+    }
 }

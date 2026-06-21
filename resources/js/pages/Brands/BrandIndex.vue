@@ -118,8 +118,8 @@ const handleAction = ({ type, data }) => {
 
             </BaseIndex>
 
-            <CreateBrand v-if="showCreateBrandModal" @form-closed="showCreateBrandModal = false" />
-
+            <CreateBrand v-if="showCreateBrandModal" @form-closed="showCreateBrandModal = false"
+                @brand-created="() => { showCreateBrandModal = false; router.reload({ only: ['brands'] }); }" />
 
             <UpdateBrand v-if="showUpdateBrandModal" :brand="selectedBrand"
                 @brand-form-closed="showUpdateBrandModal = false" />

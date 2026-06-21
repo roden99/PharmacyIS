@@ -1,59 +1,62 @@
-<script lang="ts">
-export const description
-  = 'A sidebar that collapses to icons.'
-export const iframeHeight = '800px'
-export const containerClass = 'w-full h-full'
-</script>
-
 <script setup lang="ts">
-import AppSidebar from '@/registry/new-york/blocks/Sidebar07/components/AppSidebar.vue'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/registry/new-york/ui/breadcrumb'
-import { Separator } from '@/registry/new-york/ui/separator'
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/registry/new-york/ui/sidebar'
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head } from '@inertiajs/vue3';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Users, Hospital, User } from 'lucide-vue-next';
+
+defineProps<{
+  stats: {
+    total_customers: number;
+    total_drugstores: number;
+    total_doctors: number;
+  };
+}>();
 </script>
 
 <template>
-  <SidebarProvider>
-    <AppSidebar />
-    <SidebarInset>
-      <header class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-        <div class="flex items-center gap-2 px-4">
-          <SidebarTrigger class="-ml-1" />
-          <Separator orientation="vertical" class="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Building Your Application
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator class="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
-      <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-        </div>
-        <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+
+  <Head title="Dashboard" />
+  <AppLayout>
+    <div class="flex flex-1 flex-col gap-4 p-4">
+
+      <div class="grid gap-4 md:grid-cols-3">
+
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Total Customers</CardTitle>
+            <Users class="h-5 w-5 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div class="text-3xl font-bold">{{ stats.total_customers }}</div>
+            <p class="text-xs text-muted-foreground mt-1">Active customers</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Drugstores</CardTitle>
+            <Hospital class="h-5 w-5 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div class="text-3xl font-bold">{{ stats.total_drugstores }}</div>
+            <p class="text-xs text-muted-foreground mt-1">Active drugstore accounts</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle class="text-sm font-medium">Doctors</CardTitle>
+            <User class="h-5 w-5 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div class="text-3xl font-bold">{{ stats.total_doctors }}</div>
+            <p class="text-xs text-muted-foreground mt-1">Active doctor accounts</p>
+          </CardContent>
+        </Card>
+
       </div>
-    </SidebarInset>
-  </SidebarProvider>
+
+      <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+    </div>
+  </AppLayout>
 </template>

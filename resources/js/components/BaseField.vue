@@ -19,6 +19,17 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+
+const props = defineProps({
+    legend: {
+        type: String,
+        default: 'Default Legend',
+    },
+    description: {
+        type: String,
+        default: 'Default Description',
+    },
+})
 </script>
 
 <template>
@@ -28,10 +39,10 @@ import { Textarea } from '@/components/ui/textarea'
             <!-- Default content if no slot is provided -->
             <FieldSet>
                 <FieldLegend>
-                    <slot name="legend">Default Legend</slot>
+                    <slot name="legend">{{ props.legend }}</slot>
                 </FieldLegend>
                 <FieldDescription>
-                    <slot name="description">Default Description</slot>
+                    <slot name="description">{{ props.description }}</slot>
                 </FieldDescription>
                 <FieldGroup>
                     <slot name="fields">

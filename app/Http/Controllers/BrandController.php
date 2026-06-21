@@ -18,15 +18,21 @@ class BrandController extends Controller
 
         if (request()->wantsJson()) {
             $search = $request->input('search');
+            $includeId = $request->input('include_id');
 
             $query = brand::where('status', 1);
 
             if (!empty($search)) {
                 $query->where('brandname', 'like', "{$search}%");
             }
-            return response()->json([
-                'brands' => $query->orderBy('brandname')->limit(5)->get(['id', 'brandname'])
-            ]);
+            $results = $query->orderBy('brandname')->limit(5)->get(['id', 'brandname']);
+
+            if ($includeId && !$results->contains('id', (int)$includeId)) {
+                $extra = brand::where('id', (int)$includeId)->first(['id', 'brandname']);
+                if ($extra) $results->prepend($extra);
+            }
+
+            return response()->json(['brands' => $results]);
         }
 
         $search = $request->input('search');
@@ -83,10 +89,11 @@ class BrandController extends Controller
         // Add system-generated fields
         $validated['created_by'] = $request->user()->id;
 
+        $brand = brand::create($validated);
 
-        brand::create($validated);
-
-        return redirect()->route('brands.index')->with('success', 'Brand created successfully!');
+        if (request()->expectsJson()) {
+            return response()->json(['brand' => $brand]);
+        }
     }
 
     /**
@@ -120,7 +127,7 @@ class BrandController extends Controller
 
         $brand->update($validated);
 
-        return redirect()->route('brands.index')->with('success', 'Brand updated successfully!');
+        // return response()->json(['success' => true, 'message' => 'Brand updated successfully!']);
     }
 
     /**
@@ -137,6 +144,6 @@ class BrandController extends Controller
             'updated_by' => $request->user()->id
         ]);
 
-        return redirect()->route('brands.index')->with('success', 'Brand deactivated successfully!');
+        // return response()->json(['success' => true, 'message' => 'Brand deactivated successfully!']);
     }
 }

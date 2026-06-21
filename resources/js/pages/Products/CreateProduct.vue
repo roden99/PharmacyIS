@@ -12,6 +12,14 @@ const props = defineProps({
     productUnits: {
         type: Array,
         default: () => []
+    },
+    strengths: {
+        type: Array,
+        default: () => []
+    },
+    drugforms: {
+        type: Array,
+        default: () => []
     }
 });
 
@@ -20,7 +28,6 @@ const emit = defineEmits(['form-closed']);
 const handleClose = () => {
     emit('form-closed');
 };
-
 
 
 const isProcessing = ref(false);
@@ -52,7 +59,8 @@ const handleSubmit = (formData) => {
 
     <div>
         <ProductForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
-            :card-title="'New Product'" :transaction-type="'create'" :brands="brands" :product-units="productUnits" />
+            :card-title="'New Product'" :transaction-type="'create'" :brands="brands" :product-units="productUnits"
+            :strengths="strengths" :drugforms="drugforms" />
     </div>
 
 </template>

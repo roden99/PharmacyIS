@@ -14,11 +14,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['brand-form-closed']);
+const formRef = ref(null);
 
 const handleClose = () => {
     emit('brand-form-closed');
 };
-
 
 const isProcessing = ref(false);
 const handleSubmit = (formData) => {
@@ -32,10 +32,10 @@ const handleSubmit = (formData) => {
             emit('brand-form-closed'); // Close modal on success
         },
         onError: (errors) => {
-
             const firstErrorKey = Object.keys(errors)[0];
             toast.warning('Failed to deactivate brand.', { description: errors[firstErrorKey] });
             isProcessing.value = false;
+            formRef.value?.closeDialog();
         },
         onFinish: () => {
             isProcessing.value = false;
@@ -48,7 +48,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <BrandForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
+        <BrandForm ref="formRef" @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
             :card-title="'Delete Brand'" :transaction-type="'delete'" :brand="brand" />
     </div>
 

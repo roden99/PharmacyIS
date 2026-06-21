@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Delivery;
 use App\Models\supplier;
 use App\Models\PurchaseOrder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class DeliveryController extends Controller
@@ -40,9 +41,11 @@ class DeliveryController extends Controller
         $columns = [
             ['accessorKey' => 'id', 'header' => 'ID', 'isVisible' => true, 'isParameter' => false],
             ['accessorKey' => 'supplier_name', 'header' => 'SUPPLIER', 'isVisible' => true, 'isParameter' => true],
-            ['accessorKey' => 'po_number', 'header' => 'PO NUMBER', 'isVisible' => true, 'isParameter' => false],
+            // ['accessorKey' => 'po_number', 'header' => 'PO NUMBER', 'isVisible' => true, 'isParameter' => false],
+            ['accessorKey' => 'invoice_no', 'header' => 'INVOICE NO.', 'isVisible' => true, 'isParameter' => true],
+            ['accessorKey' => 'invoice_date', 'header' => 'INVOICE DATE', 'isVisible' => true, 'isParameter' => false],
             ['accessorKey' => 'delivery_date', 'header' => 'DELIVERY DATE', 'isVisible' => true, 'isParameter' => false],
-            ['accessorKey' => 'status', 'header' => 'STATUS', 'isVisible' => true, 'isParameter' => true],
+
             ['accessorKey' => 'notes', 'header' => 'NOTES', 'isVisible' => false, 'isParameter' => false],
             ['accessorKey' => 'created_at', 'header' => 'CREATED AT', 'isVisible' => false, 'isParameter' => false],
         ];
@@ -68,17 +71,40 @@ class DeliveryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'purchase_order_id' => 'nullable|exists:purchase_orders,id',
-            'supplier_id' => 'required|exists:suppliers,id',
-            'delivery_date' => 'required|date',
-            'status' => 'required|in:pending,received,partial,cancelled',
-            'notes' => 'nullable|string|max:1000',
+            'purchase_order_id'         => 'nullable|exists:purchase_orders,id',
+            'supplier_id'               => 'required|exists:suppliers,id',
+            'invoice_no'                => 'required|string|max:255',
+            'invoice_date'              => 'required|date',
+            'delivery_date'             => 'required|date',
+            'items'                     => 'required|array|min:1',
+            'items.*.product_id'        => 'required|exists:products,id',
+            'items.*.quantity_received' => 'required|integer|min:1',
+            'items.*.unit_price'        => 'required|numeric|min:0',
         ]);
 
-        // Add system-generated fields
         $validated['created_by'] = $request->user()->id;
 
-        Delivery::create($validated);
+        $delivery = Delivery::create(collect($validated)->except('items')->toArray());
+
+        foreach ($validated['items'] as $item) {
+            \App\Models\DeliveryItem::create([
+                'delivery_id'       => $delivery->id,
+                'product_id'        => $item['product_id'],
+                'quantity_received' => $item['quantity_received'],
+                'unit_price'        => $item['unit_price'],
+                'warehouse_id'      => 1,
+                'created_by'        => $request->user()->id,
+            ]);
+
+            $product = \App\Models\product::find($item['product_id']);
+            if ($product && $product->is_inventory) {
+                $afterInit = !$product->initial_date
+                    || Carbon::parse($validated['delivery_date'])->startOfDay()->gte(Carbon::parse($product->initial_date)->startOfDay());
+                if ($afterInit) {
+                    $product->increment('product_qty', $item['quantity_received']);
+                }
+            }
+        }
 
         return redirect()->route('deliveries.index')->with('success', 'Delivery created successfully!');
     }
@@ -88,7 +114,27 @@ class DeliveryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $delivery = Delivery::with(['items.product.brand', 'items.product.unit', 'items.product.drugform'])->findOrFail($id);
+
+        return response()->json([
+            'delivery' => $delivery,
+            'items' => $delivery->items->map(function ($item) {
+                $product = $item->product;
+                $parts = [$product?->productname];
+                if ($product?->drugform) $parts[] = $product->drugform->drugformname;
+                if ($product?->unit)    $parts[] = $product->unit->unit_name;
+                $displayName = implode(' ', array_filter($parts));
+                if ($product?->brand)   $displayName .= ' (' . $product->brand->brandname . ')';
+
+                return [
+                    'id'                => $item->id,
+                    'product_id'        => (string) $item->product_id,
+                    'product_name'      => $displayName ?: ('Product #' . $item->product_id),
+                    'quantity'          => $item->quantity_received,
+                    'unit_price'        => $item->unit_price,
+                ];
+            }),
+        ]);
     }
 
     /**
@@ -105,18 +151,62 @@ class DeliveryController extends Controller
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'purchase_order_id' => 'nullable|exists:purchase_orders,id',
-            'supplier_id' => 'required|exists:suppliers,id',
-            'delivery_date' => 'required|date',
-            'status' => 'required|in:pending,received,partial,cancelled',
-            'notes' => 'nullable|string|max:1000',
+            'supplier_id'               => 'required|exists:suppliers,id',
+            'invoice_no'                => 'required|string|max:255',
+            'invoice_date'              => 'required|date',
+            'delivery_date'             => 'required|date',
+            'items'                     => 'required|array|min:1',
+            'items.*.product_id'        => 'required|exists:products,id',
+            'items.*.quantity_received' => 'required|integer|min:1',
+            'items.*.unit_price'        => 'required|numeric|min:0',
         ]);
 
-        // Add updated_by field
-        $validated['updated_by'] = $request->user()->id;
+        $delivery = Delivery::with('items')->findOrFail($id);
 
-        $delivery = Delivery::findOrFail($id);
-        $delivery->update($validated);
+        // Reverse old item quantities
+        foreach ($delivery->items as $oldItem) {
+            $product = \App\Models\product::find($oldItem->product_id);
+            if ($product && $product->is_inventory) {
+                $afterInit = !$product->initial_date
+                    || Carbon::parse($delivery->delivery_date)->startOfDay()->gte(Carbon::parse($product->initial_date)->startOfDay());
+                if ($afterInit) {
+                    $product->decrement('product_qty', $oldItem->quantity_received);
+                }
+            }
+        }
+
+        // Delete old items
+        $delivery->items()->delete();
+
+        // Update delivery header
+        $delivery->update([
+            'supplier_id'   => $validated['supplier_id'],
+            'invoice_no'    => $validated['invoice_no'],
+            'invoice_date'  => $validated['invoice_date'],
+            'delivery_date' => $validated['delivery_date'],
+            'updated_by'    => $request->user()->id,
+        ]);
+
+        // Insert new items
+        foreach ($validated['items'] as $item) {
+            \App\Models\DeliveryItem::create([
+                'delivery_id'       => $delivery->id,
+                'product_id'        => $item['product_id'],
+                'quantity_received' => $item['quantity_received'],
+                'unit_price'        => $item['unit_price'],
+                'warehouse_id'      => 1,
+                'created_by'        => $request->user()->id,
+            ]);
+
+            $product = \App\Models\product::find($item['product_id']);
+            if ($product && $product->is_inventory) {
+                $afterInit = !$product->initial_date
+                    || Carbon::parse($validated['delivery_date'])->startOfDay()->gte(Carbon::parse($product->initial_date)->startOfDay());
+                if ($afterInit) {
+                    $product->increment('product_qty', $item['quantity_received']);
+                }
+            }
+        }
 
         return redirect()->route('deliveries.index')->with('success', 'Delivery updated successfully!');
     }

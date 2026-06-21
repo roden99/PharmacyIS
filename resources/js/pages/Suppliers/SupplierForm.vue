@@ -8,9 +8,10 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, ref, computed, version } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import axios from 'axios';
+import Skeleton from '@/components/ui/skeleton/Skeleton.vue';
 
 
 import { CalendarDate, fromDate, getLocalTimeZone } from '@internationalized/date';
@@ -21,6 +22,7 @@ import BaseCombobox from '@/components/ui/BaseCombobox.vue';
 import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from '@/components/ui/field';
 import BaseTab from '@/components/BaseTab.vue'
 import BaseField from '@/components/BaseField.vue';
+import { useFieldGroupSkeleton } from '@/composables/useFieldGroupSkeleton';
 
 
 
@@ -49,28 +51,18 @@ const props = defineProps({
 
 });
 
-const confirmButtonText = computed(() => {
-    if (props.transactionType === 'create') return 'Save';
-    if (props.transactionType === 'update') return 'Update';
-    if (props.transactionType === 'delete') return 'Deactivate';
-    return 'Yes';
-});
 
 const handleAlertClose = () => {
     isDialogOpen.value = false;
 
     if (props.transactionType === 'delete') {
-        emit('member-form-closed')
+        emit('form-closed')
     }
 };
 
 
 const isFormValidated = () => {
-    if (!form.company.toString().trim() ||
-        !form.lastname.toString().trim() ||
-        !form.firstname.toString().trim() ||
-        !form.contact_phone.toString().trim() ||
-        !form.contact_email.toString().trim()) {
+    if (!form.company.toString().trim()) {
         toast.error('ERROR', { description: 'Please complete all required fields.' });
         return false;
     }
@@ -113,8 +105,7 @@ const form = useForm({
 
 
 
-const emit = defineEmits(['handleSubmit', 'member-form-closed']);
-
+const emit = defineEmits(['handleSubmit', 'form-closed']);
 
 const handleSubmit = () => {
     try {
@@ -138,15 +129,27 @@ const barangayOptions = ref([]);
 
 
 const isDialogOpen = ref(false);
+const isLoading = ref(true);
 
-onMounted(() => {
+// Fields: company(12), contact person(12), phone(4), email(4), tin(4), address(12), street(12)
+const { skeletonLayout } = useFieldGroupSkeleton([12, 12, 4, 4, 4, 12, 12]);
 
+watch(() => props.isProcessing, (newVal, oldVal) => {
+    if (oldVal === true && newVal === false) {
+        isDialogOpen.value = false;
+    }
+});
 
-
+onMounted(async () => {
     if (props.transactionType === 'delete') {
         isDialogOpen.value = true;
     }
-
+    isLoading.value = true;
+    try {
+        // await db calls here
+    } finally {
+        isLoading.value = false;
+    }
 });
 
 // Fetch provinces on mount
@@ -200,141 +203,87 @@ onMounted(() => {
 <template>
     <!-- <FormCard v-show="!isDialogOpen" :card-title="cardTitle"> -->
 
-    <FormCard :loading="isProcessing" :card-title="cardTitle">
-        <form @submit.prevent="Submit" class="space-y-4">
-
-            <div class="w-full min-h-[310px] space-y-6">
-
-                <BaseField>
-                    <template #fieldGroups>
-                        <!-- Supplier Information -->
-                        <FieldSet>
-                            <!-- <FieldLegend>Supplier Information</FieldLegend> -->
-
-                            <!-- Supplier Input Fields Here -->
-                            <FieldGroup class="rounded-lg border p-4">
-
-                                <div class="grid w-full grid-cols-15 gap-4">
-                                    <Field class="col-span-15">
-                                        <FieldLabel class="font-normal">Supplier Name:</FieldLabel>
-                                        <Input v-model="form.company" required />
-                                    </Field>
+    <FormCard :loading="isProcessing" size="lg">
+        <form @submit.prevent="Submit" class="space-y-4 mt-4">
 
 
-                                    <Field class="col-span-15">
-                                        <FieldLabel class="font-normal">Contact Person:</FieldLabel>
-                                        <div class="grid grid-cols-3 gap-4">
-                                            <Input v-model="form.lastname" placeholder="Last Name" required />
-                                            <Input v-model="form.firstname" placeholder="First Name" required />
-                                            <Input v-model="form.middlename" placeholder="Middle Name" />
-                                        </div>
-                                    </Field>
+            <BaseField legend="Supplier Information" description="Enter supplier details">
+                <template #fields>
+                    <FieldGroup :skeleton="isLoading" :skeleton-layout="skeletonLayout">
+                        <div class="grid w-full grid-cols-12 gap-4">
+                            <Field class="col-span-12">
+                                <FieldLabel class="font-normal">Supplier Name:</FieldLabel>
+                                <Input v-model="form.company" required />
+                            </Field>
 
-                                    <Field class="col-span-5">
-                                        <FieldLabel class=" font-normal">Phone Number:</FieldLabel>
-                                        <Input v-model="form.contact_phone" required />
-                                    </Field>
-
-
-                                    <Field class="col-span-5">
-                                        <FieldLabel class="font-normal">Email Address:</FieldLabel>
-                                        <Input v-model="form.contact_email" type="email" required />
-                                    </Field>
-
-                                    <Field class="col-span-5">
-
-                                        <FieldLabel class="font-normal">TIN Number:</FieldLabel>
-                                        <Input v-model="form.tin" />
-
-                                    </Field>
-
-
-
-
-                                    <Field class="col-span-15">
-                                        <FieldLabel class="font-normal">Address:</FieldLabel>
-                                        <div class="grid grid-cols-3 gap-4">
-                                            <BaseCombobox v-model="selectedProvince" placeholder="Province"
-                                                empty-message="No province found" width="w-full" />
-                                            <BaseCombobox v-model="selectedCity" placeholder="Municipality"
-                                                empty-message="No municipality found" width="w-full" />
-                                            <BaseCombobox v-model="selectedBarangay" placeholder="Select Barangay"
-                                                empty-message="No barangay found" width="w-full" />
-                                        </div>
-                                    </Field>
-
-                                    <Field class="col-span-15 mb-6">
-                                        <FieldLabel class="font-normal">Street Address / Unit / Building:</FieldLabel>
-                                        <Input v-model="form.address"
-                                            placeholder="Enter street address, unit number, building name, etc." />
-                                    </Field>
+                            <Field class="col-span-12">
+                                <FieldLabel class="font-normal">Contact Person:</FieldLabel>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <Input v-model="form.lastname" placeholder="Last Name" />
+                                    <Input v-model="form.firstname" placeholder="First Name" />
+                                    <Input v-model="form.middlename" placeholder="Middle Name" />
                                 </div>
-                            </FieldGroup>
-                        </FieldSet>
-                    </template>
+                            </Field>
 
-                </BaseField>
+                            <Field class="col-span-4">
+                                <FieldLabel class="font-normal">Phone Number:</FieldLabel>
+                                <Input v-model="form.contact_phone" />
+                            </Field>
 
+                            <Field class="col-span-4">
+                                <FieldLabel class="font-normal">Email Address:</FieldLabel>
+                                <Input v-model="form.contact_email" type="email" />
+                            </Field>
 
-            </div>
+                            <Field class="col-span-4">
+                                <FieldLabel class="font-normal">TIN Number:</FieldLabel>
+                                <Input v-model="form.tin" />
+                            </Field>
 
+                            <Field class="col-span-12">
+                                <FieldLabel class="font-normal">Address:</FieldLabel>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <BaseCombobox v-model="selectedProvince" placeholder="Province"
+                                        empty-message="No province found" width="w-full" />
+                                    <BaseCombobox v-model="selectedCity" placeholder="Municipality"
+                                        empty-message="No municipality found" width="w-full" />
+                                    <BaseCombobox v-model="selectedBarangay" placeholder="Select Barangay"
+                                        empty-message="No barangay found" width="w-full" />
+                                </div>
+                            </Field>
 
+                            <Field class="col-span-12 mb-6">
+                                <FieldLabel class="font-normal">Street Address / Unit / Building:</FieldLabel>
+                                <Input v-model="form.address"
+                                    placeholder="Enter street address, unit number, building name, etc." />
+                            </Field>
+                        </div>
+                    </FieldGroup>
 
-            <div class="flex justify-end space-x-2">
+                </template>
 
-                <BaseButton text="Cancel" variant="outline" color="secondary" type="button"
-                    @click="emit('member-form-closed')">
-                </BaseButton>
+            </BaseField>
 
-                <BaseButton :loading="isProcessing" :text="confirmButtonText" variant="default" color="primary"
-                    type="button" @click="openConfirmDialog">
-                </BaseButton>
-
-
-            </div>
 
         </form>
+        <template #footer>
+            <Skeleton v-if="isLoading" class="h-9 w-20" />
+            <BaseButton v-else type="button" :disabled="isProcessing" @click="emit('form-closed')"
+                transactionType="cancel">
+            </BaseButton>
+            <Skeleton v-if="isLoading" class="h-9 w-20" />
+            <BaseButton v-else type="button" @click="openConfirmDialog" :transactionType="props.transactionType"
+                :loading="isProcessing" :disabled="isProcessing">
+            </BaseButton>
+        </template>
+
+        <BaseAlertDialog v-model:open="isDialogOpen" :loading="isProcessing" :transaction-type="props.transactionType"
+            @cancel="handleAlertClose" @confirm="handleSubmit" />
+
 
 
     </FormCard>
 
-    <BaseAlertDialog v-model:open="isDialogOpen">
-        <template #alertTitle>
-            <template v-if="transactionType === 'create'">
-                Are you sure you want to save?
-            </template>
-
-            <template v-if="transactionType === 'update'">
-                Are you sure you want to update?
-            </template>
-
-            <template v-if="transactionType === 'delete'">
-                Are you sure you want to deactivate this supplier?
-            </template>
-
-        </template>
-        <template #alertDescription>
-            <h4 class="font-semibold text-sm mb-2">Supplier Details:</h4>
-            <div class="text-sm space-y-1">
-                <p><span class="font-medium">Company:</span> {{ form.company || 'N/A' }}</p>
-                <p><span class="font-medium">Contact Person:</span> {{ form.firstname }} {{ form.middlename }} {{
-                    form.lastname }}</p>
-                <p><span class="font-medium">Email:</span> {{ form.contact_email || 'N/A' }}</p>
-                <p><span class="font-medium">Phone:</span> {{ form.contact_phone || 'N/A' }}</p>
-                <p v-if="form.address"><span class="font-medium">Address:</span> {{ form.address }}</p>
-            </div>
-        </template>
-
-        <template #alertFooter>
-
-            <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
-                @click="handleAlertClose" />
-
-            <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
-                @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
-
-        </template>
-    </BaseAlertDialog>
 
 
 

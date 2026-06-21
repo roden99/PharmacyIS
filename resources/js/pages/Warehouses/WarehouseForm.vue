@@ -119,106 +119,38 @@ const handleSubmit = () => {
 const isDialogOpen = ref(false);
 
 onMounted(() => {
-
-
-
     if (props.transactionType === 'delete') {
         isDialogOpen.value = true;
     }
-
 });
-
 
 
 </script>
 
 <template>
-    <!-- <FormCard v-show="!isDialogOpen" :card-title="cardTitle"> -->
-
-    <FormCard :loading="isProcessing" :card-title="cardTitle" max-width="max-w-lg">
-        <form @submit.prevent="Submit" class="space-y-4">
-
-            <div class="w-full space-y-6">
-
-                <BaseField>
-                    <template #fieldGroups>
-                        <!-- Warehouse Information -->
-                        <FieldSet>
-                            <!-- <FieldLegend>Warehouse Information</FieldLegend> -->
-
-                            <!-- Warehouse Input Fields Here -->
-                            <FieldGroup class="rounded-lg border p-4">
-
-                                <div class="grid w-full grid-cols-15 gap-4">
-                                    <Field class="col-span-15">
-                                        <FieldLabel class="font-normal">Warehouse Name:</FieldLabel>
-                                        <Input v-model="form.warehousename" required />
-                                    </Field>
-
-
-
-                                </div>
-                            </FieldGroup>
-                        </FieldSet>
-                    </template>
-
-                </BaseField>
-
-
-            </div>
-
-
-
-            <div class="flex justify-end space-x-2">
-
-                <BaseButton text="Cancel" variant="outline" color="secondary" type="button"
-                    @click="emit('form-closed')">
-                </BaseButton>
-
-                <BaseButton :loading="isProcessing" :text="confirmButtonText" variant="default" color="primary"
-                    type="button" @click="openConfirmDialog">
-                </BaseButton>
-
-
-            </div>
-
+    <FormCard :loading="isProcessing" size="md">
+        <form @submit.prevent="Submit" class="space-y-4 mt-4">
+            <BaseField legend="Warehouse Information" description="Enter warehouse details">
+                <template #fields>
+                    <FieldGroup>
+                        <div class="grid w-full grid-cols-12 gap-4">
+                            <Field class="col-span-12">
+                                <FieldLabel class="font-normal">Warehouse Name:</FieldLabel>
+                                <Input v-model="form.warehousename" required />
+                            </Field>
+                        </div>
+                    </FieldGroup>
+                </template>
+            </BaseField>
         </form>
-
+        <template #footer>
+            <BaseButton type="button" :disabled="isProcessing" @click="emit('form-closed')" transactionType="cancel">
+            </BaseButton>
+            <BaseButton type="button" @click="openConfirmDialog" :transactionType="props.transactionType"
+                :loading="isProcessing" :disabled="isProcessing">
+            </BaseButton>
+        </template>
+        <BaseAlertDialog v-model:open="isDialogOpen" :loading="isProcessing" :transaction-type="props.transactionType"
+            @cancel="handleAlertClose" @confirm="handleSubmit" />
     </FormCard>
-
-    <BaseAlertDialog v-model:open="isDialogOpen">
-        <template #alertTitle>
-            <template v-if="transactionType === 'create'">
-                Are you sure you want to save?
-            </template>
-
-            <template v-if="transactionType === 'update'">
-                Are you sure you want to update?
-            </template>
-
-            <template v-if="transactionType === 'delete'">
-                Are you sure you want to deactivate this warehouse?
-            </template>
-        </template>
-
-        <template #alertDescription>
-            <h4 class="font-semibold text-sm mb-2">Warehouse Details:</h4>
-            <div class="text-sm space-y-1">
-                <p><span class="font-medium">Warehouse Name:</span> {{ form.warehousename || 'N/A' }}</p>
-            </div>
-        </template>
-
-        <template #alertFooter>
-
-            <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
-                @click="handleAlertClose" />
-
-            <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
-                @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
-
-        </template>
-    </BaseAlertDialog>
-
-
-
 </template>

@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             SupplierSeeder::class,
             CustomerSeeder::class,
             BrandSeeder::class,
+            StrengthSeeder::class,
+            DrugFormSeeder::class,
             ProductSeeder::class,
         ]);
     }

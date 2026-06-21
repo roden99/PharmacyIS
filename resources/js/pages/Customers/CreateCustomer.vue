@@ -1,47 +1,42 @@
 <script setup>
 import CustomerForm from '@/pages/Customers/CustomerForm.vue'
-import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
+import axios from 'axios'
 
-const emit = defineEmits(['member-form-closed']);
+const emit = defineEmits(['member-form-closed', 'customer-created']);
+
+const formRef = ref(null);
 
 const handleClose = () => {
     emit('member-form-closed');
 };
 
-
-
-const isProcessing = ref(false);
-const handleSubmit = (formData) => {
-    isProcessing.value = true;
-    router.post('/customers', formData, {
-        preserveScroll: "errors",
-        preserveState: "errors",
-        onSuccess: () => {
-            toast.success('Success', { description: 'Customer created successfully!' });
-            isProcessing.value = false;
-            emit('member-form-closed'); // Close modal on success
-        },
-        onError: (errors) => {
-            console.log('asdadasd')
+const handleSubmit = async (formData) => {
+    try {
+        const res = await axios.post('/customers', formData);
+        toast.success('Success', { description: 'Customer created successfully!' });
+        formRef.value?.closeDialog();
+        emit('customer-created', res.data.customer);
+        emit('member-form-closed');
+    } catch (error) {
+        const errors = error.response?.data?.errors;
+        if (errors) {
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to create customer.', { description: errors[firstErrorKey] });
-            isProcessing.value = false;
-        },
-        onFinish: () => {
-            isProcessing.value = false;
+            toast.warning('Failed to create customer.', { description: errors[firstErrorKey][0] });
+        } else {
+            toast.error('Failed to create customer.');
         }
-    });
+        formRef.value?.closeDialog();
+    } finally {
+
+    }
 };
-
 </script>
+
 <template>
-
-
     <div>
-        <CustomerForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+        <CustomerForm ref="formRef" @handleSubmit="handleSubmit" @member-form-closed="handleClose"
             :card-title="'New Customer'" :transaction-type="'create'" />
     </div>
-
 </template>

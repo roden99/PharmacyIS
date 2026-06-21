@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
 import CardHeader from '@/components/ui/card/CardHeader.vue';
@@ -18,7 +19,7 @@ const props = defineProps({
 
     cardTitle: {
         type: String,
-        default: 'Card Title'
+        default: null
     },
 
     loading: {
@@ -33,22 +34,44 @@ const props = defineProps({
 
     maxWidth: {
         type: String,
-        default: 'max-w-3xl'
+        default: ''
+    },
+
+    size: {
+        type: String,
+        default: 'lg',
+        validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', 'full'].includes(value),
     }
 
 });
 
+const sizeClassMap = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-3xl',
+    xl: 'max-w-4xl',
+    '2xl': 'max-w-5xl',
+    '3xl': 'max-w-6xl',
+    '4xl': 'max-w-7xl',
+    full: 'max-w-full',
+};
+
+const cardWidthClass = computed(() => {
+    if (props.maxWidth?.trim()) return props.maxWidth;
+    return sizeClassMap[props.size] || sizeClassMap.lg;
+});
+
 </script>
 <template>
-    <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <!-- Overlay to dim and "disable" the main form -->
         <div class="absolute inset-0 bg-gray-200 opacity-70 pointer-events-none"></div>
-        <Card :class="['relative w-full pointer-events-auto z-10 pb-0', maxWidth]">
-            <CardHeader>
+        <Card :class="['relative w-full pointer-events-auto z-10', cardWidthClass]">
+            <CardHeader v-if="cardTitle">
                 <CardTitle>{{ cardTitle }}</CardTitle>
             </CardHeader>
 
-            <CardContent class="space-y-3 pb-0" :class="{ 'opacity-50 pointer-events-none': loading }">
+            <CardContent class="space-y-3" :class="{ 'opacity-50 pointer-events-none': loading }">
 
                 <slot></slot>
 

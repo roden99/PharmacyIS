@@ -1,39 +1,34 @@
-php <script setup>
-import SupplierForm from '@/pages/Suppliers/SupplierForm.vue'
-import { router } from '@inertiajs/vue3'
+<script setup>
+import BrandForm from './BrandForm.vue'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
-import BrandForm from './BrandForm.vue'
+import axios from 'axios'
 
-const emit = defineEmits(['form-closed']);
+const emit = defineEmits(['form-closed', 'brand-created']);
 
 const handleClose = () => {
     emit('form-closed');
 };
 
-
-
 const isProcessing = ref(false);
-const handleSubmit = (formData) => {
+const handleSubmit = async (formData) => {
     isProcessing.value = true;
-    router.post('/brands', formData, {
-        preserveScroll: "errors",
-        preserveState: "errors",
-        onSuccess: () => {
-            toast.success('Success', { description: 'Brand created successfully!' });
-            isProcessing.value = false;
-            emit('form-closed'); // Close modal on success
-        },
-        onError: (errors) => {
-
+    try {
+        const res = await axios.post('/brands', formData);
+        toast.success('Success', { description: 'Brand created successfully!' });
+        emit('brand-created', res.data.brand);
+        emit('form-closed');
+    } catch (error) {
+        const errors = error.response?.data?.errors;
+        if (errors) {
             const firstErrorKey = Object.keys(errors)[0];
-            toast.warning('Failed to create brand.', { description: errors[firstErrorKey] });
-            isProcessing.value = false;
-        },
-        onFinish: () => {
-            isProcessing.value = false;
+            toast.warning('Failed to create brand.', { description: errors[firstErrorKey][0] });
+        } else {
+            toast.error('Failed to create brand.');
         }
-    });
+    } finally {
+        isProcessing.value = false;
+    }
 };
 
 </script>
@@ -41,7 +36,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <BrandForm @save="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
+        <BrandForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
             :card-title="'New Brand'" :transaction-type="'create'" />
     </div>
 

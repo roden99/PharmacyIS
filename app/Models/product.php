@@ -15,14 +15,23 @@ class product extends Model
         'productname',
         'brand_id',
         'product_unit_id',
+        'product_type_id',
+        'strength_id',
+        'drugform_id',
         'status',
+        'product_qty',
+        'reorder_level',
+        'initial_date',
+        'initial_qty',
+        'is_inventory',
         'created_by',
         'updated_by',
     ];
 
     protected $casts = [
-        'isgeneric' => 'boolean',
-        'status' => 'boolean',
+        'isgeneric'    => 'boolean',
+        'status'       => 'boolean',
+        'is_inventory' => 'boolean',
     ];
 
     /**
@@ -39,6 +48,27 @@ class product extends Model
     public function unit()
     {
         return $this->belongsTo(ProductUnit::class, 'product_unit_id');
+    }
+
+    public function productType()
+    {
+        return $this->belongsTo(ProductType::class, 'product_type_id');
+    }
+
+    /**
+     * Get the strength that the product belongs to.
+     */
+    public function strength()
+    {
+        return $this->belongsTo(strength::class, 'strength_id');
+    }
+
+    /**
+     * Get the drug form that the product belongs to.
+     */
+    public function drugform()
+    {
+        return $this->belongsTo(drugform::class, 'drugform_id');
     }
 
     /**

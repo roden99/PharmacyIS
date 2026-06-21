@@ -13,16 +13,19 @@ class Delivery extends Model
     protected $fillable = [
         'purchase_order_id',
         'supplier_id',
+        'invoice_no',
+        'invoice_date',
         'delivery_date',
-        'status',
-        'notes',
         'created_by',
         'updated_by',
+        'invoice_date',
+        'delivery_date'
     ];
 
-    protected $casts = [
-        'delivery_date' => 'date',
-    ];
+    // protected $casts = [
+    //     'invoice_date' => 'date',
+    //     'delivery_date' => 'date',
+    // ];
 
     public function purchaseOrder()
     {

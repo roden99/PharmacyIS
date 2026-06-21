@@ -16,6 +16,14 @@ const props = defineProps({
     productUnits: {
         type: Array,
         default: () => []
+    },
+    strengths: {
+        type: Array,
+        default: () => []
+    },
+    drugforms: {
+        type: Array,
+        default: () => []
     }
 });
 
@@ -56,7 +64,7 @@ const handleSubmit = (formData) => {
     <div>
         <ProductForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
             :card-title="'Update Product'" :transaction-type="'update'" :product="product" :brands="brands"
-            :product-units="productUnits" />
+            :product-units="productUnits" :strengths="strengths" :drugforms="drugforms" />
     </div>
 
 </template>

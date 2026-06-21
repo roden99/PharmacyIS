@@ -16,6 +16,21 @@ class SupplierController extends Controller
 
 
 
+        if (request()->wantsJson()) {
+            $search = $request->input('search');
+
+            $query = supplier::where('status', 'active');
+
+            if (!empty($search)) {
+                $query->where('company', 'like', "{$search}%");
+            }
+            return response()->json([
+                'suppliers' => $query->orderBy('company')->limit(5)->get(['id', 'company'])
+            ]);
+        }
+
+
+
         $search = $request->input('search');
         $column = $request->input('column');
 
@@ -84,13 +99,13 @@ class SupplierController extends Controller
             'tin' => 'nullable|string|max:50',
 
             // Contact person information
-            'lastname' => 'required|string|max:255',
-            'firstname' => 'required|string|max:255',
+            'lastname' => 'nullable|string|max:255',
+            'firstname' => 'nullable|string|max:255',
             'middlename' => 'nullable|string|max:255',
 
             // Contact details
-            'contact_phone' => 'required|string|max:50',
-            'contact_email' => 'required|email|max:255',
+            'contact_phone' => 'nullable|string|max:50',
+            'contact_email' => 'nullable|email|max:255',
 
             // Address information
             'address' => 'nullable|string|max:500',
@@ -101,9 +116,11 @@ class SupplierController extends Controller
         $validated['created_by'] = $request->user()->id;
         $validated['status'] = $validated['status'] ?? 'active';
 
-        supplier::create($validated);
+        $supplier = supplier::create($validated);
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier created successfully!');
+        if (request()->expectsJson()) {
+            return response()->json(['supplier' => $supplier]);
+        }
     }
 
     /**
@@ -133,13 +150,13 @@ class SupplierController extends Controller
             'tin' => 'nullable|string|max:50',
 
             // Contact person information
-            'lastname' => 'required|string|max:255',
-            'firstname' => 'required|string|max:255',
+            'lastname' => 'nullable|string|max:255',
+            'firstname' => 'nullable|string|max:255',
             'middlename' => 'nullable|string|max:255',
 
             // Contact details
-            'contact_phone' => 'required|string|max:50',
-            'contact_email' => 'required|email|max:255',
+            'contact_phone' => 'nullable|string|max:50',
+            'contact_email' => 'nullable|email|max:255',
 
             // Address information
             'address' => 'nullable|string|max:500',

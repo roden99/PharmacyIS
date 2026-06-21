@@ -4,8 +4,6 @@ import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 
-
-
 const props = defineProps({
     customer: {
         type: Object,
@@ -13,43 +11,34 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['member-form-closed']);
+const emit = defineEmits(['member-form-closed', 'customer-deleted']);
+
+const formRef = ref(null);
 
 const handleClose = () => {
     emit('member-form-closed');
 };
 
-
-const isProcessing = ref(false);
-const handleSubmit = (formData) => {
-    isProcessing.value = true;
+const handleSubmit = () => {
     router.delete(`/customers/${props.customer.id}`, {
-        preserveScroll: "errors",
-        preserveState: "errors",
+        preserveScroll: 'errors',
+        preserveState: 'errors',
         onSuccess: () => {
             toast.success('Success', { description: 'Customer deactivated successfully!' });
-            isProcessing.value = false;
-            emit('member-form-closed'); // Close modal on success
+            emit('member-form-closed');
         },
         onError: (errors) => {
-
             const firstErrorKey = Object.keys(errors)[0];
             toast.warning('Failed to deactivate customer.', { description: errors[firstErrorKey] });
-            isProcessing.value = false;
+            emit('member-form-closed');
         },
-        onFinish: () => {
-            isProcessing.value = false;
-        }
     });
 };
-
 </script>
+
 <template>
-
-
     <div>
-        <CustomerForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+        <CustomerForm ref="formRef" @handleSubmit="handleSubmit" @member-form-closed="handleClose"
             :card-title="'Delete Customer'" :transaction-type="'delete'" :customer="customer" />
     </div>
-
 </template>

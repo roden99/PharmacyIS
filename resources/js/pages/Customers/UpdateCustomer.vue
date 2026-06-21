@@ -11,43 +11,34 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['member-form-closed']);
+const emit = defineEmits(['member-form-closed', 'customer-updated']);
+
+const formRef = ref(null);
 
 const handleClose = () => {
     emit('member-form-closed');
 };
 
-
-const isProcessing = ref(false);
 const handleSubmit = (formData) => {
-    isProcessing.value = true;
     router.put(`/customers/${props.customer.id}`, formData, {
-        preserveScroll: "errors",
-        preserveState: "errors",
+        preserveScroll: 'errors',
+        preserveState: 'errors',
         onSuccess: () => {
             toast.success('Success', { description: 'Customer updated successfully!' });
-            isProcessing.value = false;
-            emit('member-form-closed'); // Close modal on success
+            emit('member-form-closed');
         },
         onError: (errors) => {
-
             const firstErrorKey = Object.keys(errors)[0];
             toast.warning('Failed to update customer.', { description: errors[firstErrorKey] });
-            isProcessing.value = false;
+            emit('member-form-closed');
         },
-        onFinish: () => {
-            isProcessing.value = false;
-        }
     });
 };
-
 </script>
+
 <template>
-
-
     <div>
-        <CustomerForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+        <CustomerForm ref="formRef" @handleSubmit="handleSubmit" @member-form-closed="handleClose"
             :card-title="'Update Customer'" :transaction-type="'update'" :customer="customer" />
     </div>
-
 </template>

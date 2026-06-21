@@ -82,6 +82,10 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    rowClass: {
+        type: Function,
+        default: null
+    },
     // Legacy single field support
     hoverField: {
         type: String,
@@ -120,13 +124,19 @@ const computedHoverItems = (rowData) => {
 const getActionsForIndex = (indexType) => {
     const actionMap = {
         'Members': ['verifyEligibility', 'edit', 'delete'],
-        'Products': ['edit', 'delete'],
+        'Products': ['edit', 'initial', 'reorder', 'history', 'delete'],
         'Orders': ['view', 'download', 'add'],
         'Patients': ['view', 'edit', 'delete'],
         'Users': ['view', 'edit', 'delete'],
         'Categories': ['edit', 'copy', 'delete'],
         'ClaimEligibility': ['view', 'edit', 'delete'],
         'Accreditations': ['view', 'download', 'delete'],
+        'Suppliers': ['edit', 'delete'],
+        'Customers': ['edit', 'delete'],
+        'Warehouse Items': ['history', 'edit', 'delete'],
+        'SalesAccounts': ['clients', 'edit', 'delete'],
+
+        // Add more index types as needed
         // Add more index types as needed
     };
 
@@ -293,6 +303,7 @@ const columns = [
             header: col.header ?? col.accessorKey,
             cell: col.cell ?? (({ row }) => row.getValue(col.accessorKey)),
             accessorKey: col.accessorKey,
+            cellClass: col.cellClass ?? null,
         })),
 
 
@@ -353,7 +364,7 @@ const table = useVueTable({
     onExpandedChange: (updaterOrValue) => valueUpdater(updaterOrValue, expanded),
     initialState: {
         pagination: {
-            pageSize: hasServerPagination.value ? tableData.value.length : 100,
+            pageSize: 100,
         },
     },
     state: {
@@ -387,8 +398,8 @@ const hasFilteredMembers = computed(() => {
 watch(selectValue, (val, oldVal) => {
     emit('update:selectModelValue', val);
 
-    // Reset the filter value for the previous column
-    if (oldVal && table.getColumn(oldVal)) {
+    // Reset the filter value for the previous column (only if it exists in the table)
+    if (oldVal && props.columnDefs.some(c => c.accessorKey === oldVal) && table.getColumn(oldVal)) {
         table.getColumn(oldVal).setFilterValue('');
     }
 });
@@ -398,7 +409,7 @@ watch(selectValue, (val, oldVal) => {
 <template>
     <div class="flex h-full flex-1 flex-col gap-1 rounded-xl p-1">
         <div class="ml-1 w-full">
-            <!-- <span class="text-base font-semibold">{{ props.IndexType }}</span> -->
+            <span class="text-base font-semibold">{{ props.IndexType }}</span>
             <div class="flex items-center gap-2 py-2">
                 <slot>
                     <Button variant="default" class="mr-2">Create</Button>
@@ -463,9 +474,10 @@ watch(selectValue, (val, oldVal) => {
                         <TableBody>
                             <template v-if="table.getRowModel().rows?.length">
                                 <template v-for="row in table.getRowModel().rows" :key="row.id">
-                                    <TableRow :data-state="row.getIsSelected() && 'selected'">
+                                    <TableRow :data-state="row.getIsSelected() && 'selected'"
+                                        :class="props.rowClass ? props.rowClass(row.original) : ''">
                                         <TableCell v-for="(cell, index) in row.getVisibleCells()" :key="cell.id"
-                                            class="capitalize text-left">
+                                            :class="['capitalize text-left', typeof cell.column.columnDef.cellClass === 'function' ? cell.column.columnDef.cellClass(row.original) : (cell.column.columnDef.cellClass ?? '')]">
 
                                             <!-- Wrap all cells with BaseHover to show dynamic data -->
                                             <BaseHover :items="computedHoverItems(row.original)">
@@ -514,8 +526,8 @@ watch(selectValue, (val, oldVal) => {
 
                 <!-- Pagination Controls -->
                 <div class="flex justify-center">
-                    <Pagination :total="paginationInfo.last_page" :sibling-count="1" :show-edges="true"
-                        :default-page="paginationInfo.current_page" @update:page="goToPage">
+                    <Pagination :total="paginationInfo.last_page" :items-per-page="1" :sibling-count="1"
+                        :show-edges="true" :default-page="paginationInfo.current_page" @update:page="goToPage">
                         <PaginationContent>
                             <!-- First Page -->
                             <PaginationFirst v-if="paginationInfo.current_page > 3" @click="firstPage" />

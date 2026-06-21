@@ -13,10 +13,10 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['member-form-closed']);
+const emit = defineEmits(['form-closed']);
 
 const handleClose = () => {
-    emit('member-form-closed');
+    emit('form-closed');
 };
 
 
@@ -48,7 +48,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <SupplierForm @handleSubmit="handleSubmit" @member-form-closed="handleClose" :is-processing="isProcessing"
+        <SupplierForm @handleSubmit="handleSubmit" @form-closed="emit('form-closed')" :is-processing="isProcessing"
             :card-title="'Delete Supplier'" :transaction-type="'delete'" :supplier="supplier" />
     </div>
 

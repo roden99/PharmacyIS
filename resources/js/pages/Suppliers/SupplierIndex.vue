@@ -57,14 +57,13 @@ const selectedSupplier = ref(null);
 
 const handleAction = ({ type, data }) => {
 
-    console.log('🎯 Action Clicked:', {
-        actionType: type,
-        supplierData: data,
-        timestamp: new Date().toISOString(),
+    // console.log('🎯 Action Clicked:', {
+    //     actionType: type,
+    //     supplierData: data,
+    //     timestamp: new Date().toISOString(),
 
 
-    });
-
+    // });
     switch (type) {
         case 'edit':
             console.log('📄 Edit action for:', data);
@@ -141,15 +140,15 @@ const formattedSuppliers = computed(() => {
 
             </BaseIndex>
 
-            <CreateSupplier v-if="showCreateSupplierModal" @member-form-closed="showCreateSupplierModal = false" />
+            <CreateSupplier v-if="showCreateSupplierModal" @form-closed="showCreateSupplierModal = false" />
 
 
 
             <UpdateSupplier v-if="showUpdateSupplierModal" :supplier="selectedSupplier"
-                @member-form-closed="showUpdateSupplierModal = false" />
+                @form-closed="showUpdateSupplierModal = false" />
 
             <DeleteSupplier v-if="showDeleteSupplierModal" :supplier="selectedSupplier"
-                @member-form-closed="showDeleteSupplierModal = false" />
+                @form-closed="showDeleteSupplierModal = false" />
 
 
         </div>

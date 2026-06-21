@@ -1,25 +1,12 @@
 <script setup>
 import FormCard from '@/components/FormCard.vue';
-import BaseSelect from '@/components/ui/BaseSelect.vue';
-
-import InputError from '@/components/InputError.vue';
 import BaseAlertDialog from '@/components/ui/BaseAlertDialog.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/vue3';
-import { onMounted, ref, computed, version } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { toast } from 'vue-sonner';
-import axios from 'axios';
-
-
-import { CalendarDate, fromDate, getLocalTimeZone } from '@internationalized/date';
-import BaseDatePick from '@/components/ui/BaseDatePick.vue';
-import { useDateFormatter } from '@/composables/useDateFormatter';
-import { normalizeDate, set } from '@vueuse/core';
-import BaseCombobox from '@/components/ui/BaseCombobox.vue';
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSeparator, FieldSet } from '@/components/ui/field';
-import BaseTab from '@/components/BaseTab.vue'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import BaseField from '@/components/BaseField.vue';
 
 
@@ -49,12 +36,13 @@ const props = defineProps({
 
 });
 
-const confirmButtonText = computed(() => {
-    if (props.transactionType === 'create') return 'Save';
-    if (props.transactionType === 'update') return 'Update';
-    if (props.transactionType === 'delete') return 'Deactivate';
-    return 'Yes';
+const form = useForm({
+    brandname: props.brand?.brandname || '',
 });
+
+const isLoading = ref(true);
+const isDialogOpen = ref(false);
+const isBusy = computed(() => props.isProcessing);
 
 const handleAlertClose = () => {
     isDialogOpen.value = false;
@@ -70,13 +58,11 @@ const isFormValidated = () => {
         toast.error('Fill up the forms properly');
         return false;
     }
-
     return true;
 };
 
 
 const openConfirmDialog = () => {
-
     form.clearErrors();
     if (!isFormValidated()) return false;
     isDialogOpen.value = true;
@@ -84,20 +70,8 @@ const openConfirmDialog = () => {
 
 };
 
-const buttonVariants = computed(() => {
-
-    return props.transactionType === 'create' ? 'default' : props.transactionType === 'update' ? 'default' : 'destructive';
-});
 
 
-
-
-const form = useForm({
-
-    //Brand Information
-    brandname: props.brand?.brandname || '',
-
-});
 
 
 
@@ -107,118 +81,58 @@ const emit = defineEmits(['handleSubmit', 'form-closed']);
 
 const handleSubmit = () => {
     try {
-
         emit('handleSubmit', form.data());
     } catch (error) {
         toast.error('ERROR', { description: error.message });
     }
-}
+};
 
+const closeDialog = () => {
+    isDialogOpen.value = false;
+};
 
-
-const isDialogOpen = ref(false);
+defineExpose({ closeDialog });
 
 onMounted(() => {
-
-
 
     if (props.transactionType === 'delete') {
         isDialogOpen.value = true;
     }
+    isLoading.value = false;
 
 });
 
 
 
 </script>
-
 <template>
-    <!-- <FormCard v-show="!isDialogOpen" :card-title="cardTitle"> -->
-
-    <FormCard :loading="isProcessing" :card-title="cardTitle" max-width="max-w-lg">
-        <form @submit.prevent="Submit" class="space-y-4">
-
-            <div class="w-full space-y-6">
-
-                <BaseField>
-                    <template #fieldGroups>
-                        <!-- Supplier Information -->
-                        <FieldSet>
-                            <!-- <FieldLegend>Supplier Information</FieldLegend> -->
-
-                            <!-- Supplier Input Fields Here -->
-                            <FieldGroup class="rounded-lg border p-4">
-
-                                <div class="grid w-full grid-cols-15 gap-4">
-                                    <Field class="col-span-15">
-                                        <FieldLabel class="font-normal">Brand Name:</FieldLabel>
-                                        <Input v-model="form.brandname" required />
-                                    </Field>
-
-
-
-                                </div>
-                            </FieldGroup>
-                        </FieldSet>
-                    </template>
-
-                </BaseField>
-
-
-            </div>
-
-
-
-            <div class="flex justify-end space-x-2">
-
-                <BaseButton text="Cancel" variant="outline" color="secondary" type="button"
-                    @click="emit('form-closed')">
-                </BaseButton>
-
-                <BaseButton :loading="isProcessing" :text="confirmButtonText" variant="default" color="primary"
-                    type="button" @click="openConfirmDialog">
-                </BaseButton>
-
-
-            </div>
-
+    <FormCard :loading="isProcessing" size="md">
+        <form @submit.prevent="Submit" class="space-y-4 mt-4">
+            <BaseField legend="Brand Information" description="Enter brand details">
+                <template #fields>
+                    <FieldGroup :skeleton="isLoading" :skeleton-rows="1" :skeleton-cols="1">
+                        <div class="grid w-full grid-cols-12 gap-4">
+                            <Field class="col-span-12">
+                                <FieldLabel class="font-normal">Brand Name:</FieldLabel>
+                                <Input v-model="form.brandname" required />
+                            </Field>
+                        </div>
+                    </FieldGroup>
+                </template>
+            </BaseField>
         </form>
+        <template #footer>
 
+            <BaseButton type="button" :disabled="isBusy" @click="emit('form-closed')" transactionType="cancel"
+                :skeleton="isLoading">
+            </BaseButton>
+
+            <BaseButton type="button" :disabled="isBusy" @click="openConfirmDialog"
+                :transactionType="props.transactionType" :skeleton="isLoading">
+            </BaseButton>
+
+        </template>
+        <BaseAlertDialog v-model:open="isDialogOpen" :loading="isProcessing" :transaction-type="props.transactionType"
+            @cancel="handleAlertClose" @confirm="handleSubmit" />
     </FormCard>
-
-    <BaseAlertDialog v-model:open="isDialogOpen">
-        <template #alertTitle>
-            <template v-if="transactionType === 'create'">
-                Are you sure you want to save?
-            </template>
-
-            <template v-if="transactionType === 'update'">
-                Are you sure you want to update?
-            </template>
-
-            <template v-if="transactionType === 'delete'">
-                Are you sure you want to deactivate this brand?
-            </template>
-
-        </template>
-        <template #alertDescription>
-            <h4 class="font-semibold text-sm mb-2">Brand Details:</h4>
-            <div class="text-sm space-y-1">
-                <p><span class="font-medium">Brand Name:</span> {{ form.brandname || 'N/A' }}</p>
-            </div>
-        </template>
-
-        <template #alertFooter>
-
-            <BaseButton text="Cancel" :disabled="isProcessing" :variant="'outline'" color="secondary" type="button"
-                @click="handleAlertClose" />
-
-            <BaseButton :text="confirmButtonText" :variant="buttonVariants" color="primary" type="button"
-                @click="handleSubmit" :disabled="isProcessing" :loading="isProcessing" />
-
-        </template>
-    </BaseAlertDialog>
-
-
-
 </template>
