@@ -121,7 +121,6 @@ const handleAction = ({ type, data }) => {
             <CreateBrand v-if="showCreateBrandModal" @form-closed="showCreateBrandModal = false" />
 
 
-
             <UpdateBrand v-if="showUpdateBrandModal" :brand="selectedBrand"
                 @brand-form-closed="showUpdateBrandModal = false" />
 

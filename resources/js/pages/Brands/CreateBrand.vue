@@ -1,8 +1,9 @@
-<script setup>
-import BrandForm from './BrandForm.vue'
+php <script setup>
+import SupplierForm from '@/pages/Suppliers/SupplierForm.vue'
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
+import BrandForm from './BrandForm.vue'
 
 const emit = defineEmits(['form-closed']);
 
@@ -40,7 +41,7 @@ const handleSubmit = (formData) => {
 
 
     <div>
-        <BrandForm @handleSubmit="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
+        <BrandForm @save="handleSubmit" @form-closed="handleClose" :is-processing="isProcessing"
             :card-title="'New Brand'" :transaction-type="'create'" />
     </div>
 
