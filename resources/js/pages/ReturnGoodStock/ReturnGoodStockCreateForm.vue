@@ -45,8 +45,8 @@ const notes = ref('');
 // Item row fields
 const productOptions = ref([]);
 const selectedProduct = ref(null);
-const lotNumber = ref('');
-const expirationDate = ref(null);
+const lotOptions = ref([]);
+const selectedLot = ref(null);
 const itemQty = ref(1);
 const itemUnitPrice = ref(0);
 
@@ -98,6 +98,25 @@ async function loadProducts(search = '') {
     }
 }
 
+watch(selectedProduct, async (id) => {
+    selectedLot.value = null;
+    lotOptions.value = [];
+    if (!id) return;
+    try {
+        const res = await axios.get(`/products/${id}/lots`, {
+            headers: { Accept: 'application/json' },
+        });
+        lotOptions.value = (res.data.lots ?? []).map(l => ({
+            value: String(l.id),
+            label: `${l.lot_number} (exp: ${l.expiration_date})`,
+            lot_number: l.lot_number,
+            expiration_date: l.expiration_date,
+        }));
+    } catch {
+        // no lots available
+    }
+});
+
 const addItem = () => {
     if (!selectedProduct.value) {
         toast.error('Please select a product.');
@@ -109,19 +128,21 @@ const addItem = () => {
     }
 
     const product = productOptions.value.find(p => p.value === selectedProduct.value);
+    const lot = lotOptions.value.find(l => l.value === selectedLot.value);
 
     returnItems.value.push({
         product_id: selectedProduct.value,
         product_name: product?.label ?? `Product #${selectedProduct.value}`,
-        lot_number: lotNumber.value.trim() || null,
-        expiration_date: expirationDate.value ? normalizeDate(expirationDate.value) : null,
+        lot_id: selectedLot.value ?? null,
+        lot_number: lot?.lot_number ?? null,
+        expiration_date: lot?.expiration_date ?? null,
         quantity: Number(itemQty.value),
         unit_price: Number(itemUnitPrice.value) || 0,
     });
 
     selectedProduct.value = null;
-    lotNumber.value = '';
-    expirationDate.value = null;
+    selectedLot.value = null;
+    lotOptions.value = [];
     itemQty.value = 1;
     itemUnitPrice.value = 0;
 };
@@ -158,8 +179,7 @@ const handleSubmit = () => {
         notes: notes.value || null,
         items: returnItems.value.map(i => ({
             product_id: Number(i.product_id),
-            lot_number: i.lot_number,
-            expiration_date: i.expiration_date,
+            lot_id: i.lot_id ? Number(i.lot_id) : null,
             quantity: i.quantity,
             unit_price: i.unit_price,
         })),
@@ -229,7 +249,9 @@ onMounted(async () => {
                                     </Field>
                                     <Field class="col-span-4">
                                         <FieldLabel class="font-normal">Lot Number:</FieldLabel>
-                                        <Input v-model="lotNumber" placeholder="e.g. LOT-001" :disabled="isBusy" />
+                                        <BaseCombobox v-model="selectedLot" :options="lotOptions"
+                                            empty-message="No lots found" width="w-full" placeholder="Select lot..."
+                                            :disabled="isBusy || !selectedProduct" />
                                     </Field>
                                     <Field class="col-span-2">
                                         <FieldLabel class="font-normal">Qty:</FieldLabel>
@@ -246,10 +268,7 @@ onMounted(async () => {
                                         <BaseButton type="button" @click="addItem" transactionType="add"
                                             :disabled="isBusy" :skeleton="isLoading" />
                                     </Field>
-                                    <Field class="col-span-5">
-                                        <FieldLabel class="font-normal">Expiry:</FieldLabel>
-                                        <BaseDatePick v-model="expirationDate" :disabled="isBusy" />
-                                    </Field>
+
                                 </div>
 
                                 <!-- Items table -->

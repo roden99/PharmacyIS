@@ -164,8 +164,7 @@ class ReturnGoodStockController extends Controller
             'notes'                     => 'nullable|string|max:500',
             'items'                     => 'required|array|min:1',
             'items.*.product_id'        => 'required|exists:products,id',
-            'items.*.lot_number'        => 'nullable|string|max:100',
-            'items.*.expiration_date'   => 'nullable|date',
+            'items.*.lot_id'            => 'nullable|exists:product_lots,id',
             'items.*.quantity'          => 'required|integer|min:1',
             'items.*.unit_price'        => 'nullable|numeric|min:0',
         ]);
@@ -182,29 +181,7 @@ class ReturnGoodStockController extends Controller
             ]);
 
             foreach ($validated['items'] as $item) {
-                $lotId = null;
-
-                if (!empty($item['lot_number'])) {
-                    $existing = DB::table('product_lots')
-                        ->where('product_id', $item['product_id'])
-                        ->where('lot_number', $item['lot_number'])
-                        ->first();
-
-                    if ($existing) {
-                        $lotId = $existing->id;
-                    } else {
-                        $lotId = DB::table('product_lots')->insertGetId([
-                            'product_id'      => $item['product_id'],
-                            'lot_number'      => $item['lot_number'],
-                            'expiration_date' => $item['expiration_date'] ?? null,
-                            'quantity'        => 0,
-                            'created_by'      => $request->user()->id,
-                            'updated_by'      => $request->user()->id,
-                            'created_at'      => now(),
-                            'updated_at'      => now(),
-                        ]);
-                    }
-                }
+                $lotId = $item['lot_id'] ?? null;
 
                 ReturnGoodStockItem::create([
                     'return_good_stock_id' => $rgs->id,
