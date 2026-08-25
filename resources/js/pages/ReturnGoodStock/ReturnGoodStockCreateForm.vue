@@ -27,7 +27,7 @@ const props = defineProps({
 
 const emit = defineEmits(['handleSubmit', 'form-closed']);
 
-const { skeletonLayout } = useFieldGroupSkeleton([6, 12, 12]);
+const { skeletonLayout } = useFieldGroupSkeleton([6, 12, 12, 12]);
 const { skeletonLayout: skeletonLayoutItems } = useFieldGroupSkeleton([12]);
 
 const isLoading = ref(false);
@@ -39,6 +39,7 @@ const customerOptions = ref([]);
 const selectedCustomer = ref(null);
 const accountOptions = ref([]);
 const selectedAccount = ref(null);
+const invoiceNo = ref('');
 const rgsDate = ref(null);
 const notes = ref('');
 
@@ -175,6 +176,7 @@ const handleSubmit = () => {
     emit('handleSubmit', {
         customer_id: Number(selectedCustomer.value),
         customer_sales_account_id: selectedAccount.value ? Number(selectedAccount.value) : null,
+        invoice_no: invoiceNo.value.trim() || null,
         rgs_date: normalizeDate(rgsDate.value),
         notes: notes.value || null,
         items: returnItems.value.map(i => ({
@@ -215,6 +217,10 @@ onMounted(async () => {
                                         <BaseCombobox v-model="selectedAccount" :options="accountOptions"
                                             empty-message="No accounts found" width="w-full"
                                             placeholder="Select account..." :disabled="isBusy || !selectedCustomer" />
+                                    </Field>
+                                    <Field class="col-span-12">
+                                        <FieldLabel>Invoice No.</FieldLabel>
+                                        <Input v-model="invoiceNo" placeholder="e.g. INV-001" :disabled="isBusy" />
                                     </Field>
                                     <Field class="col-span-12">
                                         <FieldLabel>RGS Date <span class="text-destructive">*</span></FieldLabel>

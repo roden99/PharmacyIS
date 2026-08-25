@@ -11,6 +11,7 @@ class ReturnGoodStock extends Model
         'customer_id',
         'customer_sales_account_id',
         'sales_order_id',
+        'invoice_no',
         'rgs_date',
         'notes',
         'created_by',

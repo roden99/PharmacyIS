@@ -748,16 +748,17 @@ class CustomerAccountController extends Controller
             ->whereNull('rgs.sales_order_id')
             ->select(
                 'rgs.id',
+                'rgs.invoice_no',
                 'rgs.rgs_date as date',
                 'rgs.notes',
                 DB::raw('SUM(ri.quantity * ri.unit_price) as amount')
             )
-            ->groupBy('rgs.id', 'rgs.rgs_date', 'rgs.notes')
+            ->groupBy('rgs.id', 'rgs.invoice_no', 'rgs.rgs_date', 'rgs.notes')
             ->get()
             ->map(fn($row) => [
                 'type'       => 'RGS',
                 'reference'  => 'RGS #' . $row->id,
-                'invoice_no' => '—',
+                'invoice_no' => $row->invoice_no ?? '—',
                 'amount'     => (float) $row->amount,
                 'notes'      => $row->notes ?? '',
                 'date'       => $row->date ? \Carbon\Carbon::parse($row->date) : null,

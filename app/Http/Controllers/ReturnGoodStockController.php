@@ -39,7 +39,7 @@ class ReturnGoodStockController extends Controller
                 'rgs.rgs_date',
                 'rgs.notes',
                 'rgs.sales_order_id',
-                'so.invoice_no',
+                DB::raw('COALESCE(so.invoice_no, rgs.invoice_no) as invoice_no'),
                 DB::raw('COALESCE(c_so.first_name,  c_direct.first_name)  as first_name'),
                 DB::raw('COALESCE(c_so.last_name,   c_direct.last_name)   as last_name'),
                 DB::raw('COALESCE(c_so.company,     c_direct.company)     as company'),
@@ -50,7 +50,10 @@ class ReturnGoodStockController extends Controller
 
         if (!empty($search) && strlen($search) >= 3 && !empty($column)) {
             if ($column === 'invoice_no') {
-                $query->where('so.invoice_no', 'like', "{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('so.invoice_no', 'like', "{$search}%")
+                        ->orWhere('rgs.invoice_no', 'like', "{$search}%");
+                });
             } elseif ($column === 'customer_name') {
                 $query->where(function ($q) use ($search) {
                     $q->where('c_so.last_name',    'like', "{$search}%")
@@ -160,6 +163,7 @@ class ReturnGoodStockController extends Controller
         $validated = $request->validate([
             'customer_id'               => 'required|exists:customers,id',
             'customer_sales_account_id' => 'nullable|exists:customer_sales_account,id',
+            'invoice_no'                => 'nullable|string|max:100',
             'rgs_date'                  => 'required|date',
             'notes'                     => 'nullable|string|max:500',
             'items'                     => 'required|array|min:1',
@@ -174,6 +178,7 @@ class ReturnGoodStockController extends Controller
                 'customer_id'               => $validated['customer_id'],
                 'customer_sales_account_id' => $validated['customer_sales_account_id'] ?? null,
                 'sales_order_id'            => null,
+                'invoice_no'                => $validated['invoice_no'] ?? null,
                 'rgs_date'                  => $validated['rgs_date'],
                 'notes'                     => $validated['notes'] ?? null,
                 'created_by'                => $request->user()->id,
