@@ -69,11 +69,23 @@ class CustomerAccountController extends Controller
             ->select('customer_sales_account_id', DB::raw('SUM(amount) as total'))
             ->groupBy('customer_sales_account_id');
 
-        $rgsTotal = DB::table('return_good_stocks as rgs')
+        $rgsViaSO = DB::table('return_good_stocks as rgs')
             ->join('sales_orders as rso', 'rso.id', '=', 'rgs.sales_order_id')
             ->join('return_good_stock_items as ri', 'ri.return_good_stock_id', '=', 'rgs.id')
+            ->whereNotNull('rgs.sales_order_id')
             ->select('rso.customer_sales_account_id', DB::raw('SUM(ri.quantity * ri.unit_price) as total'))
             ->groupBy('rso.customer_sales_account_id');
+
+        $rgsDirect = DB::table('return_good_stocks as rgs')
+            ->join('return_good_stock_items as ri', 'ri.return_good_stock_id', '=', 'rgs.id')
+            ->whereNotNull('rgs.customer_sales_account_id')
+            ->whereNull('rgs.sales_order_id')
+            ->select('rgs.customer_sales_account_id', DB::raw('SUM(ri.quantity * ri.unit_price) as total'))
+            ->groupBy('rgs.customer_sales_account_id');
+
+        $rgsTotal = DB::query()->fromSub($rgsViaSO->union($rgsDirect), '_rgs')
+            ->select('customer_sales_account_id', DB::raw('SUM(total) as total'))
+            ->groupBy('customer_sales_account_id');
 
         // Union all payment item sources to avoid double-counting
         $pmtDirect = DB::table('customer_payment_items')
@@ -171,6 +183,25 @@ class CustomerAccountController extends Controller
             'columns'   => $columns,
             'accounts'  => $accounts,
         ]);
+    }
+
+    /**
+     * Return all sales accounts linked to a customer (for RGS account picker).
+     */
+    public function accountsByCustomer(int $customerId)
+    {
+        $accounts = DB::table('customer_sales_account as csa')
+            ->join('sales_accounts as sa', 'sa.id', '=', 'csa.sales_account_id')
+            ->where('csa.customer_id', $customerId)
+            ->select('csa.id', 'sa.account_name')
+            ->orderBy('sa.account_name')
+            ->get()
+            ->map(fn($row) => [
+                'value' => (string) $row->id,
+                'label' => strtoupper($row->account_name),
+            ]);
+
+        return response()->json(['accounts' => $accounts]);
     }
 
     /**
@@ -689,7 +720,7 @@ class CustomerAccountController extends Controller
             ]);
 
         // ── RGS CREDITS ───────────────────────────────────────────────────
-        $rgsEntries = DB::table('return_good_stocks as rgs')
+        $rgsViaSO = DB::table('return_good_stocks as rgs')
             ->join('sales_orders as so', 'so.id', '=', 'rgs.sales_order_id')
             ->join('return_good_stock_items as ri', 'ri.return_good_stock_id', '=', 'rgs.id')
             ->where('so.customer_sales_account_id', $id)
@@ -710,6 +741,29 @@ class CustomerAccountController extends Controller
                 'notes'      => $row->notes ?? '',
                 'date'       => $row->date ? \Carbon\Carbon::parse($row->date) : null,
             ]);
+
+        $rgsDirect = DB::table('return_good_stocks as rgs')
+            ->join('return_good_stock_items as ri', 'ri.return_good_stock_id', '=', 'rgs.id')
+            ->where('rgs.customer_sales_account_id', $id)
+            ->whereNull('rgs.sales_order_id')
+            ->select(
+                'rgs.id',
+                'rgs.rgs_date as date',
+                'rgs.notes',
+                DB::raw('SUM(ri.quantity * ri.unit_price) as amount')
+            )
+            ->groupBy('rgs.id', 'rgs.rgs_date', 'rgs.notes')
+            ->get()
+            ->map(fn($row) => [
+                'type'       => 'RGS',
+                'reference'  => 'RGS #' . $row->id,
+                'invoice_no' => '—',
+                'amount'     => (float) $row->amount,
+                'notes'      => $row->notes ?? '',
+                'date'       => $row->date ? \Carbon\Carbon::parse($row->date) : null,
+            ]);
+
+        $rgsEntries = $rgsViaSO->concat($rgsDirect);
 
         // ── Merge & sort by date ──────────────────────────────────────────
         $entries = $invoices->concat($manualInvoices)->concat($payments)->concat($rgsEntries)

@@ -159,6 +159,7 @@ class ReturnGoodStockController extends Controller
     {
         $validated = $request->validate([
             'customer_id'               => 'required|exists:customers,id',
+            'customer_sales_account_id' => 'nullable|exists:customer_sales_account,id',
             'rgs_date'                  => 'required|date',
             'notes'                     => 'nullable|string|max:500',
             'items'                     => 'required|array|min:1',
@@ -171,12 +172,13 @@ class ReturnGoodStockController extends Controller
 
         DB::transaction(function () use ($validated, $request) {
             $rgs = ReturnGoodStock::create([
-                'customer_id'    => $validated['customer_id'],
-                'sales_order_id' => null,
-                'rgs_date'       => $validated['rgs_date'],
-                'notes'          => $validated['notes'] ?? null,
-                'created_by'     => $request->user()->id,
-                'updated_by'     => $request->user()->id,
+                'customer_id'               => $validated['customer_id'],
+                'customer_sales_account_id' => $validated['customer_sales_account_id'] ?? null,
+                'sales_order_id'            => null,
+                'rgs_date'                  => $validated['rgs_date'],
+                'notes'                     => $validated['notes'] ?? null,
+                'created_by'                => $request->user()->id,
+                'updated_by'                => $request->user()->id,
             ]);
 
             foreach ($validated['items'] as $item) {

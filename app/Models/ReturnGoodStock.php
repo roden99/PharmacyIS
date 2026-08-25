@@ -9,6 +9,7 @@ class ReturnGoodStock extends Model
 {
     protected $fillable = [
         'customer_id',
+        'customer_sales_account_id',
         'sales_order_id',
         'rgs_date',
         'notes',

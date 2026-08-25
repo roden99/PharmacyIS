@@ -37,6 +37,8 @@ const isBusy = computed(() => isLoading.value || props.isProcessing);
 // Header fields
 const customerOptions = ref([]);
 const selectedCustomer = ref(null);
+const accountOptions = ref([]);
+const selectedAccount = ref(null);
 const rgsDate = ref(null);
 const notes = ref('');
 
@@ -46,6 +48,7 @@ const selectedProduct = ref(null);
 const lotNumber = ref('');
 const expirationDate = ref(null);
 const itemQty = ref(1);
+const itemUnitPrice = ref(0);
 
 // Line items list
 const returnItems = ref([]);
@@ -64,6 +67,21 @@ async function loadCustomers(search = '') {
         toast.error('Failed to load customers.');
     }
 }
+
+async function loadAccountsForCustomer(customerId) {
+    if (!customerId) { accountOptions.value = []; selectedAccount.value = null; return; }
+    try {
+        const res = await axios.get(`/customer-accounts/by-customer/${customerId}`, {
+            headers: { Accept: 'application/json' },
+        });
+        accountOptions.value = res.data.accounts;
+        selectedAccount.value = accountOptions.value.length === 1 ? accountOptions.value[0].value : null;
+    } catch {
+        toast.error('Failed to load accounts.');
+    }
+}
+
+watch(selectedCustomer, (id) => loadAccountsForCustomer(id));
 
 async function loadProducts(search = '') {
     try {
@@ -98,12 +116,14 @@ const addItem = () => {
         lot_number: lotNumber.value.trim() || null,
         expiration_date: expirationDate.value ? normalizeDate(expirationDate.value) : null,
         quantity: Number(itemQty.value),
+        unit_price: Number(itemUnitPrice.value) || 0,
     });
 
     selectedProduct.value = null;
     lotNumber.value = '';
     expirationDate.value = null;
     itemQty.value = 1;
+    itemUnitPrice.value = 0;
 };
 
 const removeItem = (index) => {
@@ -133,6 +153,7 @@ watch(() => props.isProcessing, (newVal, oldVal) => {
 const handleSubmit = () => {
     emit('handleSubmit', {
         customer_id: Number(selectedCustomer.value),
+        customer_sales_account_id: selectedAccount.value ? Number(selectedAccount.value) : null,
         rgs_date: normalizeDate(rgsDate.value),
         notes: notes.value || null,
         items: returnItems.value.map(i => ({
@@ -140,6 +161,7 @@ const handleSubmit = () => {
             lot_number: i.lot_number,
             expiration_date: i.expiration_date,
             quantity: i.quantity,
+            unit_price: i.unit_price,
         })),
     });
 };
@@ -167,6 +189,12 @@ onMounted(async () => {
                                         <BaseCombobox v-model="selectedCustomer" :options="customerOptions"
                                             empty-message="No customers found" width="w-full" @search="loadCustomers"
                                             placeholder="Search customer..." :disabled="isBusy" />
+                                    </Field>
+                                    <Field class="col-span-12">
+                                        <FieldLabel>Account</FieldLabel>
+                                        <BaseCombobox v-model="selectedAccount" :options="accountOptions"
+                                            empty-message="No accounts found" width="w-full"
+                                            placeholder="Select account..." :disabled="isBusy || !selectedCustomer" />
                                     </Field>
                                     <Field class="col-span-12">
                                         <FieldLabel>RGS Date <span class="text-destructive">*</span></FieldLabel>
@@ -208,6 +236,11 @@ onMounted(async () => {
                                         <Input v-model.number="itemQty" type="number" min="1" step="1" placeholder="1"
                                             :disabled="isBusy" />
                                     </Field>
+                                    <Field class="col-span-2">
+                                        <FieldLabel class="font-normal">Unit Price:</FieldLabel>
+                                        <Input v-model.number="itemUnitPrice" type="number" min="0" step="0.01"
+                                            placeholder="0.00" :disabled="isBusy" />
+                                    </Field>
                                     <Field class="col-span-1 flex flex-col">
                                         <FieldLabel class="invisible">-</FieldLabel>
                                         <BaseButton type="button" @click="addItem" transactionType="add"
@@ -228,6 +261,7 @@ onMounted(async () => {
                                                 <TableHead class="text-xs w-28">Lot No.</TableHead>
                                                 <TableHead class="text-xs w-28">Expiry</TableHead>
                                                 <TableHead class="text-xs text-center w-16">Qty</TableHead>
+                                                <TableHead class="text-xs text-right w-24">Unit Price</TableHead>
                                                 <TableHead class="w-8" />
                                             </TableRow>
                                         </TableHeader>
@@ -255,6 +289,9 @@ onMounted(async () => {
                                                 </TableCell>
                                                 <TableCell class="text-xs text-center font-medium">
                                                     {{ item.quantity }}
+                                                </TableCell>
+                                                <TableCell class="text-xs text-right font-mono">
+                                                    {{ item.unit_price.toFixed(2) }}
                                                 </TableCell>
                                                 <TableCell class="text-center">
                                                     <button type="button" @click="removeItem(i)"

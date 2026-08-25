@@ -50,6 +50,7 @@ Route::get('pos-suppliers', [SupplierController::class, 'posIndex'])->name('pos-
 Route::resource('customers', CustomerController::class);
 Route::get('customer-accounts', [CustomerAccountController::class, 'index'])->name('customer-accounts.index');
 Route::post('customer-accounts', [CustomerAccountController::class, 'store'])->name('customer-accounts.store');
+Route::get('customer-accounts/by-customer/{customerId}', [CustomerAccountController::class, 'accountsByCustomer'])->name('customer-accounts.by-customer');
 Route::get('customer-accounts/{id}/ledger', [CustomerAccountController::class, 'ledger'])->name('customer-accounts.ledger');
 Route::get('customer-accounts/{id}/unpaid-orders', [CustomerAccountController::class, 'unpaidOrders'])->name('customer-accounts.unpaid-orders');
 Route::get('customer-accounts/{id}/orders-for-payment/{paymentId}', [CustomerAccountController::class, 'ordersForPayment'])->name('customer-accounts.orders-for-payment');
