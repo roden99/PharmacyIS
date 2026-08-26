@@ -121,7 +121,8 @@ Route::get('pos-dashboard', [PosDashboardController::class, 'index'])->name('pos
 Route::resource('pos', PosController::class)->only(['index', 'store', 'show', 'destroy']);
 
 Route::resource('sales-agents', SalesAgentController::class)->only(['index', 'store', 'update', 'destroy']);
-Route::resource('carry-items', CarryItemController::class)->only(['index', 'store', 'show', 'destroy']);
+Route::resource('carry-items', CarryItemController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+Route::post('carry-items/{id}/return-items', [CarryItemController::class, 'returnItems'])->name('carry-items.return-items');
 Route::patch('carry-item-details/{detail}/return', [CarryItemController::class, 'returnDetail'])->name('carry-item-details.return');
 
 Route::resource('users', UserController::class)

@@ -29,6 +29,7 @@ const emit = defineEmits(['handleSubmit', 'form-closed']);
 const form = useForm({
     sales_agent_id: null,
     carry_date: null,
+    reference_number: '',
     notes: '',
 });
 
@@ -149,6 +150,10 @@ const addItem = () => {
         toast.error('Please select a product.');
         return;
     }
+    if (!selectedLot.value) {
+        toast.error('Please select a lot number.');
+        return;
+    }
     const product = productsOptions.value.find(p => p.value === selectedProduct.value);
     const lot = lotOptions.value.find(l => l.value === selectedLot.value);
 
@@ -197,6 +202,10 @@ onMounted(async () => {
                                     <Field class="col-span-12">
                                         <FieldLabel class="font-normal">Carry Date:</FieldLabel>
                                         <BaseDatePick v-model="form.carry_date" class="w-32" />
+                                    </Field>
+                                    <Field class="col-span-12">
+                                        <FieldLabel class="font-normal">Reference No.:</FieldLabel>
+                                        <Input v-model="form.reference_number" placeholder="Optional reference..." />
                                     </Field>
                                     <Field class="col-span-12">
                                         <FieldLabel class="font-normal">Notes:</FieldLabel>

@@ -454,6 +454,14 @@ class ProductController extends Controller
 
     public function history(product $product)
     {
+        $product->load(['unit', 'brand', 'drugform']);
+
+        $parts = [$product->productname];
+        if ($product->drugform) $parts[] = $product->drugform->drugformname;
+        if ($product->unit)     $parts[] = $product->unit->unit_name;
+        $displayName = implode(' ', $parts);
+        if ($product->brand)    $displayName .= ' (' . $product->brand->brandname . ')';
+
         // Parse initial_date to Carbon so all date comparisons are consistent
         $initialDate = $product->initial_date
             ? \Carbon\Carbon::parse($product->initial_date)->startOfDay()
@@ -604,10 +612,29 @@ class ProductController extends Controller
                 ];
             });
 
+        // Carry item returns (IN) — products returned from sales agent to inventory
+        $carryReturns = \App\Models\CarryItemReturn::with(['carryItem.salesAgent'])
+            ->where('product_id', $product->id)
+            ->get()
+            ->map(function ($ret) use ($initialDate) {
+                $date = \Carbon\Carbon::parse($ret->return_date)->startOfDay();
+                $agent = $ret->carryItem?->salesAgent?->name ?? 'N/A';
+                return [
+                    'date'           => $date,
+                    'type'           => 'IN',
+                    'reference'      => 'Carry Return #' . $ret->carry_item_id,
+                    'party'          => $agent,
+                    'invoice_no'     => '—',
+                    'qty'            => $ret->quantity,
+                    'before_initial' => $initialDate ? $date->lt($initialDate) : false,
+                ];
+            });
+
         $entries = $entries
             ->concat($deliveries)
             ->concat($sales)
             ->concat($carryItems)
+            ->concat($carryReturns)
             ->concat($rgsItems)
             ->concat($rtsItems)
             ->sortBy('date')
@@ -646,7 +673,7 @@ class ProductController extends Controller
         return response()->json([
             'product' => [
                 'id'           => $product->id,
-                'display_name' => $product->display_name ?? $product->productname,
+                'display_name' => $displayName,
                 'initial_date' => $initialDate ? \Carbon\Carbon::parse($initialDate)->format('m-d-Y') : null,
                 'product_qty'   => (int) ($product->product_qty ?? 0),
                 'reorder_level' => (int) ($product->reorder_level ?? 0),

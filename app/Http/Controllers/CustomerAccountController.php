@@ -100,7 +100,7 @@ class CustomerAccountController extends Controller
             ->select('pci.customer_sales_account_id as csaid', 'cpi2.sub_amount')
             ->whereNull('cpi2.customer_sales_account_id')
             ->whereNull('cpi2.sales_order_id');
-        $pmtUnion = $pmtDirect->union($pmtViaSO)->union($pmtViaInv);
+        $pmtUnion = $pmtDirect->unionAll($pmtViaSO)->unionAll($pmtViaInv);
         $pmtTotal = DB::query()->fromSub($pmtUnion, '_pmt')
             ->select('csaid', DB::raw('SUM(sub_amount) as total'))
             ->groupBy('csaid');

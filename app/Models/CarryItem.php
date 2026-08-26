@@ -9,6 +9,7 @@ class CarryItem extends Model
     protected $fillable = [
         'sales_agent_id',
         'carry_date',
+        'reference_number',
         'notes',
         'created_by',
         'updated_by',
