@@ -168,7 +168,7 @@ class ReturnGoodStockController extends Controller
             'notes'                     => 'nullable|string|max:500',
             'items'                     => 'required|array|min:1',
             'items.*.product_id'        => 'required|exists:products,id',
-            'items.*.lot_id'            => 'nullable|exists:product_lots,id',
+            'items.*.lot_id'            => 'required|exists:product_lots,id',
             'items.*.quantity'          => 'required|integer|min:1',
             'items.*.unit_price'        => 'nullable|numeric|min:0',
         ]);
@@ -212,7 +212,7 @@ class ReturnGoodStockController extends Controller
             'notes'              => 'nullable|string|max:500',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.lot_id'     => 'nullable|exists:product_lots,id',
+            'items.*.lot_id'     => 'required|exists:product_lots,id',
             'items.*.quantity'   => 'required|integer|min:1',
         ]);
 
@@ -263,7 +263,7 @@ class ReturnGoodStockController extends Controller
             'notes'              => 'nullable|string|max:500',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.lot_id'     => 'nullable|exists:product_lots,id',
+            'items.*.lot_id'     => 'required|exists:product_lots,id',
             'items.*.quantity'   => 'required|integer|min:1',
         ]);
 

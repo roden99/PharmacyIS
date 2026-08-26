@@ -79,6 +79,15 @@ const handleSubmit = () => {
             toast.error('Please add at least one item before saving.');
             return;
         }
+        const soDate = normalizeDate(form.invoice_date);
+        if (soDate) {
+            for (const item of orderItems.value) {
+                if (item.initial_date && soDate < item.initial_date) {
+                    toast.error(`Invoice date is before the initial inventory date of "${item.product_name}". Please correct the invoice date or remove this item.`);
+                    return;
+                }
+            }
+        }
         emit('handleSubmit', {
             ...form.data(),
             customer_sales_account_id: form.customer_sales_account_id
@@ -152,6 +161,7 @@ async function loadOrderItems() {
             discount_percentage: Number(item.discount_percentage) || 0,
             lot_id: item.lot_id ?? null,
             lot_number: item.lot_number ?? null,
+            initial_date: item.initial_date ?? null,
         }));
 
         const d = res.data.order;
@@ -237,6 +247,7 @@ const addItem = () => {
         quantity: qty,
         unit_price: Number(itemPrice.value),
         discount_percentage: Number(itemDiscount.value) || Number(form.discount_percentage) || 0,
+        initial_date: product?.initial_date ?? null,
     });
     selectedProduct.value = null;
     selectedProductLabel.value = '';
@@ -264,6 +275,7 @@ async function loadProducts(searchQuery = '') {
         productsOptions.value = (res.data.products ?? []).map(product => ({
             value: String(product.id),
             label: product.display_name,
+            initial_date: product.initial_date ?? null,
         }));
     } catch (error) {
         console.error('Failed to fetch products:', error);

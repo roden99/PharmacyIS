@@ -545,6 +545,9 @@ class SalesOrderController extends Controller
                     'quantity'            => $item->quantity,
                     'unit_price'          => $item->unit_price,
                     'discount_percentage' => $item->discount_percentage,
+                    'initial_date'        => $product?->initial_date
+                        ? \Carbon\Carbon::parse($product->initial_date)->format('Y-m-d')
+                        : null,
                 ];
             }),
             'rgs' => $rgsRecords,

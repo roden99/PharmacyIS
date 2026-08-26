@@ -88,6 +88,10 @@ const handleSubmit = () => {
         return;
     }
     for (const item of activeItems.value) {
+        if (!item.lot_id) {
+            toast.error(`"${item.product_name}" has no lot number. A lot number is required for all return items.`);
+            return;
+        }
         if (Number(item.quantity) > Number(item.max_qty)) {
             toast.error(`Return quantity for "${item.product_name}" exceeds original sold quantity (${item.max_qty}).`);
             return;

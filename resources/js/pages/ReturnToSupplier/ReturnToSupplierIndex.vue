@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import axios from 'axios';
 
 import CreateReturnToSupplier from '@/pages/ReturnToSupplier/CreateReturnToSupplier.vue';
+import EditReturnToSupplier from '@/pages/ReturnToSupplier/EditReturnToSupplier.vue';
 import ViewReturnToSupplier from '@/pages/ReturnToSupplier/ViewReturnToSupplier.vue';
 import DeleteReturnToSupplier from '@/pages/ReturnToSupplier/DeleteReturnToSupplier.vue';
 
@@ -32,6 +33,7 @@ const transformedColumns = computed(() =>
 );
 
 const showCreateModal = ref(false);
+const showEditModal = ref(false);
 const showViewModal = ref(false);
 const showDeleteModal = ref(false);
 const selectedRecord = ref(null);
@@ -42,6 +44,10 @@ const handleAction = async ({ type, data }) => {
         case 'view':
             selectedRecord.value = data;
             showViewModal.value = true;
+            break;
+        case 'edit':
+            selectedRecord.value = data;
+            showEditModal.value = true;
             break;
         case 'delete':
             selectedRecord.value = data;
@@ -66,6 +72,7 @@ const handleAction = async ({ type, data }) => {
             </BaseIndex>
 
             <CreateReturnToSupplier v-if="showCreateModal" @form-closed="showCreateModal = false" />
+            <EditReturnToSupplier v-if="showEditModal" :record="selectedRecord" @form-closed="showEditModal = false" />
             <ViewReturnToSupplier v-if="showViewModal" :record="selectedRecord" @form-closed="showViewModal = false" />
             <DeleteReturnToSupplier v-if="showDeleteModal" :record="selectedRecord"
                 @form-closed="showDeleteModal = false" />

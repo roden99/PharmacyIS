@@ -144,6 +144,50 @@ class ReturnToSupplierController extends Controller
         return response()->json(['message' => 'Return to supplier recorded successfully.'], 201);
     }
 
+    public function update(Request $request, string $id)
+    {
+        $validated = $request->validate([
+            'return_date'        => 'required|date',
+            'notes'              => 'nullable|string|max:500',
+            'items'              => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.lot_id'     => 'required|exists:product_lots,id',
+            'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.unit_price' => 'nullable|numeric|min:0',
+        ]);
+
+        $rts = ReturnToSupplier::with('items')->findOrFail($id);
+
+        DB::transaction(function () use ($rts, $validated, $request) {
+            // Reverse old inventory before replacing items
+            foreach ($rts->items as $old) {
+                $this->applyInventory($old->product_id, $old->lot_id, $old->quantity, $rts->return_date, '+');
+            }
+            $rts->items()->delete();
+
+            $rts->update([
+                'return_date' => $validated['return_date'],
+                'notes'       => $validated['notes'] ?? null,
+                'updated_by'  => $request->user()->id,
+            ]);
+
+            foreach ($validated['items'] as $item) {
+                ReturnToSupplierItem::create([
+                    'return_to_supplier_id' => $rts->id,
+                    'product_id'            => $item['product_id'],
+                    'lot_id'                => $item['lot_id'],
+                    'quantity'              => $item['quantity'],
+                    'unit_price'            => $item['unit_price'] ?? 0,
+                    'created_by'            => $request->user()->id,
+                    'updated_by'            => $request->user()->id,
+                ]);
+                $this->applyInventory($item['product_id'], $item['lot_id'], $item['quantity'], $validated['return_date'], '-');
+            }
+        });
+
+        return response()->json(['message' => 'Return to supplier updated successfully.']);
+    }
+
     public function destroy(string $id)
     {
         $rts = ReturnToSupplier::with('items')->findOrFail($id);

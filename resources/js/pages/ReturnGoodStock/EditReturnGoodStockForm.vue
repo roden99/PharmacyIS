@@ -2,6 +2,7 @@
 import FormCard from '@/components/FormCard.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseDatePick from '@/components/ui/BaseDatePick.vue';
+import BaseCombobox from '@/components/ui/BaseCombobox.vue';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import BaseField from '@/components/BaseField.vue';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,7 @@ const rgsInfo = ref(null);
 const rgsDate = ref(null);
 const notes = ref('');
 const returnItems = ref([]);
+const lotOptionsMap = ref({}); // product_id → lot option array
 
 const isBusy = computed(() => isLoading.value || props.isProcessing);
 
@@ -56,6 +58,12 @@ onMounted(async () => {
             product_name: item.product_name,
             lot_number: item.lot_number ?? null,
         }));
+
+        // Load lot options for items with no lot assigned
+        const missingLotIds = [...new Set(
+            returnItems.value.filter(i => !i.lot_id).map(i => i.product_id)
+        )];
+        await Promise.all(missingLotIds.map(pid => loadLotsForProduct(pid)));
     } catch {
         toast.error('Failed to load RGS details.');
         emit('form-closed');
@@ -68,6 +76,25 @@ const activeItems = computed(() =>
     returnItems.value.filter(i => Number(i.quantity) > 0)
 );
 
+async function loadLotsForProduct(productId) {
+    if (lotOptionsMap.value[productId]) return;
+    try {
+        const res = await axios.get(`/products/${productId}/lots`, {
+            headers: { Accept: 'application/json' },
+            params: { include_empty: 1 },
+        });
+        lotOptionsMap.value[productId] = res.data.lots ?? [];
+    } catch {
+        lotOptionsMap.value[productId] = [];
+    }
+}
+
+function onLotSelect(item, lotId) {
+    item.lot_id = lotId;
+    const lot = (lotOptionsMap.value[item.product_id] ?? []).find(l => l.value === lotId);
+    if (lot) item.lot_number = lot.lot_number;
+}
+
 const handleSubmit = () => {
     if (!rgsDate.value) {
         toast.error('Please select an RGS date.');
@@ -76,6 +103,12 @@ const handleSubmit = () => {
     if (activeItems.value.length === 0) {
         toast.error('Please enter a quantity for at least one item.');
         return;
+    }
+    for (const item of activeItems.value) {
+        if (!item.lot_id) {
+            toast.error(`Please select a lot for "${item.product_name}".`);
+            return;
+        }
     }
 
     emit('handleSubmit', {
@@ -157,7 +190,11 @@ const handleSubmit = () => {
                                                         <Tag class="h-3 w-3 text-amber-500 shrink-0" />
                                                         {{ item.lot_number }}
                                                     </span>
-                                                    <span v-else class="text-muted-foreground/40">—</span>
+                                                    <BaseCombobox v-else :modelValue="item.lot_id"
+                                                        @update:modelValue="(val) => onLotSelect(item, val)"
+                                                        :options="lotOptionsMap[item.product_id] ?? []"
+                                                        empty-message="No lots found" width="w-40"
+                                                        placeholder="Select lot..." :disabled="isBusy" />
                                                 </TableCell>
                                                 <TableCell class="text-xs text-center">
                                                     <Input v-model.number="item.quantity" type="number" :min="0"

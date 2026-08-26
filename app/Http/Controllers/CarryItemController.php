@@ -124,7 +124,16 @@ class CarryItemController extends Controller
                     ->first();
                 if (!$detail) continue;
 
-                $delta = (float) $upd['quantity'] - (float) $detail->quantity;
+                // How much has already been returned for this product+lot
+                $totalReturned = (float) \DB::table('carry_item_returns')
+                    ->where('carry_item_id', $carryItem->id)
+                    ->where('product_id', $detail->product_id)
+                    ->where('lot_id', $detail->lot_id)
+                    ->sum('quantity');
+
+                $oldOriginal = (float) $detail->quantity + $totalReturned;
+                $newOriginal = (float) $upd['quantity'];
+                $delta       = $newOriginal - $oldOriginal;
 
                 if ($delta > 0) {
                     product::where('id', $detail->product_id)->decrement('product_qty', $delta);
@@ -138,7 +147,8 @@ class CarryItemController extends Controller
                     }
                 }
 
-                $detail->update(['quantity' => $upd['quantity']]);
+                // Store the remaining qty (original minus already returned)
+                $detail->update(['quantity' => max(0, $newOriginal - $totalReturned)]);
             }
 
             // Remove selected details and restore their inventory
@@ -177,7 +187,17 @@ class CarryItemController extends Controller
     {
         $carryItem = CarryItem::with(['details.product.brand', 'details.product.unit', 'details.product.drugform', 'details.lot'])->findOrFail($id);
 
-        $items = $carryItem->details->map(function ($detail) {
+        // Sum returned quantities per product+lot to restore original carry qty
+        $returnedMap = \DB::table('carry_item_returns')
+            ->where('carry_item_id', $id)
+            ->selectRaw('product_id, lot_id, SUM(quantity) as total')
+            ->groupBy('product_id', 'lot_id')
+            ->get()
+            ->keyBy(fn($r) => $r->product_id . '-' . $r->lot_id);
+
+        $existingKeys = $carryItem->details->map(fn($d) => $d->product_id . '-' . $d->lot_id)->flip();
+
+        $items = $carryItem->details->map(function ($detail) use ($returnedMap) {
             $product = $detail->product;
             $parts   = [$product?->productname];
             if ($product?->drugform) $parts[] = $product->drugform->drugformname;
@@ -189,9 +209,29 @@ class CarryItemController extends Controller
                 'id'           => $detail->id,
                 'product_name' => $displayName ?: ('Product #' . $detail->product_id),
                 'lot_number'   => $detail->lot?->lot_number ?? '—',
-                'quantity'     => (float) $detail->quantity,
+                'quantity'     => (float) $detail->quantity + (float) ($returnedMap->get($detail->product_id . '-' . $detail->lot_id)?->total ?? 0),
             ];
         });
+
+        // Reconstruct fully-returned items whose detail record was deleted
+        foreach ($returnedMap as $key => $ret) {
+            if ($existingKeys->has($key)) continue;
+
+            $product = product::with(['brand', 'unit', 'drugform'])->find($ret->product_id);
+            $parts   = [$product?->productname];
+            if ($product?->drugform) $parts[] = $product->drugform->drugformname;
+            if ($product?->unit)     $parts[] = $product->unit->unit_name;
+            $displayName = implode(' ', array_filter($parts));
+            if ($product?->brand)    $displayName .= ' (' . $product->brand->brandname . ')';
+
+            $lot = ProductLot::find($ret->lot_id);
+            $items->push([
+                'id'           => null,
+                'product_name' => $displayName ?: ('Product #' . $ret->product_id),
+                'lot_number'   => $lot?->lot_number ?? '—',
+                'quantity'     => (float) $ret->total,
+            ]);
+        }
 
         $returns = CarryItemReturn::with(['product.brand', 'product.unit', 'product.drugform'])
             ->where('carry_item_id', $id)

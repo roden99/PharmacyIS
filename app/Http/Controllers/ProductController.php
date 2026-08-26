@@ -59,8 +59,11 @@ class ProductController extends Controller
                         $displayName .= ' (' . $product->brand->brandname . ')';
                     }
                     return [
-                        'id' => $product->id,
+                        'id'           => $product->id,
                         'display_name' => $displayName,
+                        'initial_date' => $product->initial_date
+                            ? \Carbon\Carbon::parse($product->initial_date)->format('Y-m-d')
+                            : null,
                     ];
                 })
             ]);
@@ -434,11 +437,15 @@ class ProductController extends Controller
         ]);
     }
 
-    public function productLots(product $product)
+    public function productLots(product $product, Request $request)
     {
-        $lots = ProductLot::where('product_id', $product->id)
-            ->where('quantity', '>', 0)
-            ->orderBy('expiration_date')
+        $query = ProductLot::where('product_id', $product->id);
+
+        if (!$request->boolean('include_empty')) {
+            $query->where('quantity', '>', 0);
+        }
+
+        $lots = $query->orderBy('expiration_date')
             ->get()
             ->map(fn($lot) => [
                 'value'           => (string) $lot->id,
@@ -534,21 +541,29 @@ class ProductController extends Controller
         }
 
         // Carry items (OUT) — products assigned to a sales agent
+        $carryReturnTotals = \DB::table('carry_item_returns')
+            ->where('product_id', $product->id)
+            ->selectRaw('carry_item_id, lot_id, SUM(quantity) as total')
+            ->groupBy('carry_item_id', 'lot_id')
+            ->get()
+            ->keyBy(fn($r) => $r->carry_item_id . '-' . $r->lot_id);
+
         $carryItems = \App\Models\CarryItemDetail::with(['carryItem.salesAgent'])
             ->where('product_id', $product->id)
             ->get()
-            ->map(function ($detail) use ($initialDate) {
+            ->map(function ($detail) use ($initialDate, $carryReturnTotals) {
                 $date = $detail->carryItem?->carry_date
                     ? \Carbon\Carbon::parse($detail->carryItem->carry_date)->startOfDay()
                     : $detail->created_at;
                 $agent = $detail->carryItem?->salesAgent?->name ?? 'N/A';
+                $returned = (float) ($carryReturnTotals->get($detail->carry_item_id . '-' . $detail->lot_id)?->total ?? 0);
                 return [
                     'date'           => $date,
                     'type'           => 'OUT',
                     'reference'      => 'Carry #' . $detail->carry_item_id,
-                    'party'          => $agent,
+                    'party'          => $agent . '/ CARRY STOCKS',
                     'invoice_no'     => '—',
-                    'qty'            => $detail->quantity,
+                    'qty'            => (float) $detail->quantity + $returned,
                     'before_initial' => $initialDate ? $date->lt($initialDate) : false,
                 ];
             });

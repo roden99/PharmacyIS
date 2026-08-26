@@ -137,7 +137,7 @@ watch(selectedProduct, async (newVal) => {
             headers: { Accept: 'application/json' },
         });
         lotOptions.value = (res.data.lots ?? []).map(l => ({
-            value: String(l.id),
+            value: l.value,
             label: `${l.lot_number} (exp: ${l.expiration_date})`,
         }));
     } catch {
