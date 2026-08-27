@@ -634,6 +634,7 @@ class ProductController extends Controller
         // Carry item returns (IN) — products returned from sales agent to inventory
         $carryReturns = \App\Models\CarryItemReturn::with(['carryItem.salesAgent'])
             ->where('product_id', $product->id)
+            ->whereHas('carryItem', fn($q) => $q->where('status', 'active'))
             ->get()
             ->map(function ($ret) use ($initialDate) {
                 $date = \Carbon\Carbon::parse($ret->return_date)->startOfDay();
