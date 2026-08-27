@@ -363,20 +363,31 @@ class ProductController extends Controller
             'quantity'        => 'required|numeric|min:0',
         ]);
 
-        \Illuminate\Support\Facades\DB::table('product_lots')->updateOrInsert(
-            [
-                'product_id' => $product->id,
-                'lot_number' => $validated['lot_number'],
-            ],
-            [
+        $existingLot = \Illuminate\Support\Facades\DB::table('product_lots')
+            ->where('product_id', $product->id)
+            ->where('lot_number', $validated['lot_number'])
+            ->first();
+
+        if ($existingLot) {
+            \Illuminate\Support\Facades\DB::table('product_lots')
+                ->where('id', $existingLot->id)
+                ->update([
+                    'quantity'   => $existingLot->quantity + $validated['quantity'],
+                    'updated_by' => $request->user()->id,
+                    'updated_at' => now(),
+                ]);
+        } else {
+            \Illuminate\Support\Facades\DB::table('product_lots')->insert([
+                'product_id'      => $product->id,
+                'lot_number'      => $validated['lot_number'],
                 'expiration_date' => $validated['expiration_date'],
                 'quantity'        => $validated['quantity'],
                 'created_by'      => $request->user()->id,
                 'updated_by'      => $request->user()->id,
                 'updated_at'      => now(),
                 'created_at'      => now(),
-            ]
-        );
+            ]);
+        }
 
         return redirect()->route('products.index')->with('success', 'Lot added successfully!');
     }

@@ -10,6 +10,7 @@ import { toast } from 'vue-sonner';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import BaseField from '@/components/BaseField.vue';
 import { useDateFormatter } from '@/composables/useDateFormatter';
+import axios from 'axios';
 
 const { normalizeDate } = useDateFormatter();
 
@@ -34,7 +35,9 @@ const form = useForm({
 
 const isLoading = ref(true);
 const isDialogOpen = ref(false);
-const isBusy = computed(() => props.isProcessing);
+const isCheckingLot = ref(false);
+const existingLot = ref(null);
+const isBusy = computed(() => props.isProcessing || isCheckingLot.value);
 
 const handleAlertClose = () => {
     isDialogOpen.value = false;
@@ -56,11 +59,34 @@ const isFormValidated = () => {
     return true;
 };
 
-const openConfirmDialog = () => {
+const openConfirmDialog = async () => {
     form.clearErrors();
-    if (!isFormValidated()) return false;
+    if (!isFormValidated()) return;
+
+    isCheckingLot.value = true;
+    try {
+        const res = await axios.get(`/products/${props.product.id}/lots/all`, {
+            headers: { Accept: 'application/json' },
+        });
+        const lots = res.data.lots ?? [];
+        existingLot.value = lots.find(l => l.lot_number === form.lot_number) ?? null;
+    } catch {
+        existingLot.value = null;
+    } finally {
+        isCheckingLot.value = false;
+    }
+
+    if (existingLot.value) {
+        const current = Number(existingLot.value.quantity);
+        const adding = Number(form.quantity);
+        toast.warning(`Lot "${form.lot_number}" already exists`, {
+            description: `Current qty: ${current}. Adding ${adding} will bring it to ${current + adding}. Continue?`,
+            action: { label: 'Continue', onClick: () => { isDialogOpen.value = true; } },
+        });
+        return;
+    }
+
     isDialogOpen.value = true;
-    return true;
 };
 
 const handleSubmit = () => {

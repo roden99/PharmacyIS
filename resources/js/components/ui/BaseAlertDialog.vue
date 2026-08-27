@@ -20,10 +20,19 @@ const props = defineProps({
     transactionType: {
         type: String,
         default: 'create'
-    }
+    },
+    title: {
+        type: String,
+        default: null
+    },
+    description: {
+        type: String,
+        default: null
+    },
 });
 
 const dialogTitle = computed(() => {
+    if (props.title) return props.title;
     if (props.transactionType === 'create') return 'Are you sure you want to save?';
     if (props.transactionType === 'update') return 'Are you sure you want to update?';
     if (props.transactionType === 'delete') return 'Are you sure you want to delete?';
@@ -31,7 +40,7 @@ const dialogTitle = computed(() => {
 });
 
 const dialogDescription = computed(() => {
-
+    if (props.description) return props.description;
 
     if (props.transactionType === 'create') {
         return 'This will permanently save the information.';

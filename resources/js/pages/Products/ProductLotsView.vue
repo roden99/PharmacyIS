@@ -83,6 +83,18 @@ const isFormValidated = () => {
 const openFormDialog = () => {
     form.clearErrors();
     if (!isFormValidated()) return;
+
+    const existing = lots.value.find(l => l.lot_number.trim() === form.lot_number.trim());
+    if (existing) {
+        const current = Number(existing.quantity);
+        const adding = Number(form.quantity);
+        toast.warning(`Lot "${form.lot_number}" already exists`, {
+            description: `Current qty: ${current}. Adding ${adding} will bring it to ${current + adding}. Continue?`,
+            action: { label: 'Continue', onClick: () => { isFormDialogOpen.value = true; } },
+        });
+        return;
+    }
+
     isFormDialogOpen.value = true;
 };
 
