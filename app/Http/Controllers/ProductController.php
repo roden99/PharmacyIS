@@ -543,6 +543,9 @@ class ProductController extends Controller
         // Carry items (OUT) — products assigned to a sales agent
         $carryReturnTotals = \DB::table('carry_item_returns')
             ->where('product_id', $product->id)
+            ->whereIn('carry_item_id', function ($sub) {
+                $sub->select('id')->from('carry_items')->where('status', 'active');
+            })
             ->selectRaw('carry_item_id, lot_id, SUM(quantity) as total')
             ->groupBy('carry_item_id', 'lot_id')
             ->get()
@@ -550,6 +553,7 @@ class ProductController extends Controller
 
         $carryItems = \App\Models\CarryItemDetail::with(['carryItem.salesAgent'])
             ->where('product_id', $product->id)
+            ->whereHas('carryItem', fn($q) => $q->where('status', 'active'))
             ->get()
             ->map(function ($detail) use ($initialDate, $carryReturnTotals) {
                 $date = $detail->carryItem?->carry_date

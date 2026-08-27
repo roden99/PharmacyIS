@@ -11,6 +11,7 @@ class CarryItem extends Model
         'carry_date',
         'reference_number',
         'notes',
+        'status',
         'created_by',
         'updated_by',
     ];

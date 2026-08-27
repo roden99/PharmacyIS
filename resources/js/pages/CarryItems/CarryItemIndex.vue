@@ -9,6 +9,7 @@ import CreateCarryItem from '@/pages/CarryItems/CreateCarryItem.vue';
 import EditCarryItem from '@/pages/CarryItems/EditCarryItem.vue';
 import ReturnCarryItem from '@/pages/CarryItems/ReturnCarryItem.vue';
 import ViewCarryItem from '@/pages/CarryItems/ViewCarryItem.vue';
+import DeleteCarryItem from '@/pages/CarryItems/DeleteCarryItem.vue';
 
 const breadcrumbs = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -32,6 +33,7 @@ const showCreateModal = ref(false);
 const showEditModal = ref(false);
 const showReturnModal = ref(false);
 const showViewModal = ref(false);
+const showDeleteModal = ref(false);
 const selectedItem = ref(null);
 
 const handleAction = ({ type, data }) => {
@@ -44,6 +46,9 @@ const handleAction = ({ type, data }) => {
     } else if (type === 'return') {
         selectedItem.value = data;
         showReturnModal.value = true;
+    } else if (type === 'delete') {
+        selectedItem.value = data;
+        showDeleteModal.value = true;
     }
 };
 </script>
@@ -70,6 +75,9 @@ const handleAction = ({ type, data }) => {
 
             <ReturnCarryItem v-if="showReturnModal && selectedItem" :carry-item="selectedItem"
                 @form-closed="showReturnModal = false" />
+
+            <DeleteCarryItem v-if="showDeleteModal && selectedItem" :carry-item="selectedItem"
+                @form-closed="showDeleteModal = false" />
         </div>
     </AppLayout>
 </template>

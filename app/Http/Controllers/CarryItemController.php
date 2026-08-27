@@ -16,7 +16,7 @@ class CarryItemController extends Controller
         $search = $request->input('search');
         $column = $request->input('column');
 
-        $query = CarryItem::with(['salesAgent'])->withCount('details');
+        $query = CarryItem::with(['salesAgent'])->withCount('details')->where('status', 'active');
 
         if (!empty($search) && !empty($column)) {
             if ($column === 'sales_agent_name') {
@@ -258,17 +258,24 @@ class CarryItemController extends Controller
     {
         $carryItem = CarryItem::with('details')->findOrFail($id);
 
-        foreach ($carryItem->details as $detail) {
-            $product = product::find($detail->product_id);
-            if ($product) {
-                $product->increment('product_qty', $detail->quantity);
+        \DB::transaction(function () use ($carryItem, $request) {
+            foreach ($carryItem->details as $detail) {
+                $product = product::find($detail->product_id);
+                if ($product) {
+                    $product->increment('product_qty', $detail->quantity);
+                }
+                if ($detail->lot_id) {
+                    ProductLot::where('id', $detail->lot_id)->increment('quantity', $detail->quantity);
+                }
             }
-            if ($detail->lot_id) {
-                ProductLot::where('id', $detail->lot_id)->increment('quantity', $detail->quantity);
-            }
-        }
 
-        $carryItem->delete();
+            $carryItem->update([
+                'status'     => 'deleted',
+                'updated_by' => $request->user()?->id,
+            ]);
+        });
+
+        return redirect()->route('carry-items.index')->with('success', 'Carry item deleted successfully.');
     }
 
     public function returnItems(Request $request, string $id)
