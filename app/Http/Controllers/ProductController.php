@@ -566,7 +566,7 @@ class ProductController extends Controller
                     'type'           => 'OUT',
                     'reference'      => 'Carry #' . $detail->carry_item_id,
                     'party'          => $agent . '/ CARRY STOCKS',
-                    'invoice_no'     => '—',
+                    'invoice_no'     => $detail->carryItem?->reference_number ?? '—',
                     'qty'            => (float) $detail->quantity + $returned,
                     'before_initial' => $initialDate ? $date->lt($initialDate) : false,
                 ];
@@ -644,7 +644,7 @@ class ProductController extends Controller
                     'type'           => 'IN',
                     'reference'      => 'Carry Return #' . $ret->carry_item_id,
                     'party'          => $agent,
-                    'invoice_no'     => '—',
+                    'invoice_no'     => $ret->carryItem?->reference_number ?? '—',
                     'qty'            => $ret->quantity,
                     'before_initial' => $initialDate ? $date->lt($initialDate) : false,
                 ];
